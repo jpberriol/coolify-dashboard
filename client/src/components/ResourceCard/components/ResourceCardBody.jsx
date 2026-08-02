@@ -12,7 +12,7 @@ const ResourceCardBody = ({ resource }) => {
 
       {/* Live CPU/RAM usage, polled every 5s */}
       <div className="mt-4">
-        <ResourceStats resourceTypeId={resource.type} resourceId={resource.id} />
+        <ResourceStats resourceUuid={resource.uuid} />
       </div>
 
       {/* Database-specific information */}

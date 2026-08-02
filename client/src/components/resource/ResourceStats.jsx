@@ -14,8 +14,7 @@ const usageBarColor = (percent) => {
   return "bg-emerald-500";
 };
 
-const fetchStats = (resourceTypeId, resourceId) =>
-  apiClient.get(`/stats/${resourceTypeId}/${resourceId}`);
+const fetchStats = (resourceUuid) => apiClient.get(`/stats/${resourceUuid}`);
 
 const UsageBar = ({ label, icon: Icon, percent, detail }) => (
   <div className="bg-slate-800/50 rounded-lg p-3">
@@ -39,18 +38,19 @@ const UsageBar = ({ label, icon: Icon, percent, detail }) => (
 /**
  * Live CPU/RAM usage, polled every 5s. Coolify's own API only exposes
  * configured limits, never actual consumption, so this hits our own
- * /api/coolify/stats/:type/:id route, which reads straight from the
- * Docker socket (see server/services/DockerStatsService.js).
+ * /api/coolify/stats/:uuid route, which reads straight from the Docker
+ * socket (see server/services/DockerStatsService.js). Matched by uuid,
+ * not the resource's numeric id - Coolify's API never exposes that id.
  */
-const ResourceStats = ({ resourceTypeId, resourceId }) => {
+const ResourceStats = ({ resourceUuid }) => {
   const { t } = useTranslation();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["resource-stats", resourceTypeId, resourceId],
-    queryFn: () => fetchStats(resourceTypeId, resourceId),
+    queryKey: ["resource-stats", resourceUuid],
+    queryFn: () => fetchStats(resourceUuid),
     refetchInterval: 5000,
     staleTime: 0,
-    enabled: Boolean(resourceId),
+    enabled: Boolean(resourceUuid),
   });
 
   return (

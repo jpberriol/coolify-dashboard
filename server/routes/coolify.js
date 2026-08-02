@@ -26,10 +26,9 @@ router.use("/", createResourceRouter("databases", RESOURCE_CONFIGS.databases));
 
 // Live CPU/RAM usage, read straight from the Docker socket (Coolify's own
 // API only exposes configured limits, never actual consumption).
-router.get("/stats/:type/:id", verifyToken, async (req, res, next) => {
+router.get("/stats/:uuid", verifyToken, async (req, res, next) => {
   try {
-    const { type, id } = req.params;
-    const data = await getResourceStats(type, id);
+    const data = await getResourceStats(req.params.uuid);
     res.json(data);
   } catch (error) {
     next(error);

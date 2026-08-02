@@ -1,18 +1,21 @@
 import Docker from "dockerode";
-import { AppError } from "../utils/errorHandler.js";
 
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 
 /**
- * Coolify tags every container it manages with one of these labels,
- * set to the resource's internal numeric id (not its uuid).
- * See bootstrap/helpers/docker.php in coollabsio/coolify.
+ * Coolify's own REST API never exposes a resource's internal numeric id
+ * (confirmed: ApplicationsController.php only serializes uuid), only the
+ * uuid - so matching by coolify.applicationId/serviceId/databaseId (which
+ * uses that numeric id) is a dead end from the frontend.
+ *
+ * Every container Coolify deploys - whether a plain Dockerfile app or a
+ * full docker-compose stack - runs under a Compose project named after the
+ * resource's uuid (confirmed via `docker inspect` on real containers:
+ * com.docker.compose.project=<uuid>, identical across every container that
+ * belongs to the same resource, e.g. Keycloak + its Postgres). That's a
+ * more reliable match than the coolify.* labels.
  */
-const LABEL_BY_TYPE = {
-  application: "coolify.applicationId",
-  service: "coolify.serviceId",
-  database: "coolify.databaseId",
-};
+const PROJECT_LABEL = "com.docker.compose.project";
 
 const calcCpuPercent = (stats) => {
   const cpuDelta =
@@ -52,18 +55,14 @@ const readContainerStats = async (containerInfo) => {
 
 /**
  * Live CPU/RAM usage for every container backing a Coolify resource.
- * A "service" resource can be backed by more than one container, so this
- * always returns an array, even for applications/databases (usually length 1).
+ * A resource can be backed by more than one container (e.g. an app plus
+ * its database in the same compose stack), so this always returns an
+ * array, even when there's only one match.
  */
-export const getResourceStats = async (resourceType, resourceId) => {
-  const labelKey = LABEL_BY_TYPE[resourceType];
-  if (!labelKey) {
-    throw new AppError(`Unknown resource type: ${resourceType}`, 400);
-  }
-
+export const getResourceStats = async (resourceUuid) => {
   const containers = await docker.listContainers({
     all: false,
-    filters: JSON.stringify({ label: [`${labelKey}=${resourceId}`] }),
+    filters: JSON.stringify({ label: [`${PROJECT_LABEL}=${resourceUuid}`] }),
   });
 
   return Promise.all(containers.map(readContainerStats));
