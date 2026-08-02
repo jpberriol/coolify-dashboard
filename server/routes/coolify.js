@@ -4,6 +4,7 @@ import {
   createResourceRouter,
   RESOURCE_CONFIGS,
 } from "../factories/ResourceRouterFactory.js";
+import { getResourceStats } from "../services/DockerStatsService.js";
 
 /**
  * Coolify API Routes
@@ -22,5 +23,17 @@ const router = express.Router();
 router.use("/", createResourceRouter("applications", RESOURCE_CONFIGS.applications));
 router.use("/", createResourceRouter("services", RESOURCE_CONFIGS.services));
 router.use("/", createResourceRouter("databases", RESOURCE_CONFIGS.databases));
+
+// Live CPU/RAM usage, read straight from the Docker socket (Coolify's own
+// API only exposes configured limits, never actual consumption).
+router.get("/stats/:type/:id", verifyToken, async (req, res, next) => {
+  try {
+    const { type, id } = req.params;
+    const data = await getResourceStats(type, id);
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

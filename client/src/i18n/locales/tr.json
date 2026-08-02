@@ -87,7 +87,12 @@
     "active": "Aktif",
     "resourceLimits": "Kaynak Limitleri",
     "memoryLimit": "Bellek Limiti",
-    "swapLimit": "Swap Limiti"
+    "swapLimit": "Swap Limiti",
+    "liveUsage": "Anlık Kullanım",
+    "cpuUsage": "CPU",
+    "memoryUsage": "Bellek",
+    "loadingStats": "Kullanım yükleniyor...",
+    "noStatsAvailable": "Bu kaynak için çalışan bir konteyner bulunamadı"
   },
   "sortOptions": {
     "byName": "İsme göre",

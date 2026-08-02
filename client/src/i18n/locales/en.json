@@ -87,7 +87,12 @@
     "active": "Active",
     "resourceLimits": "Resource Limits",
     "memoryLimit": "Memory Limit",
-    "swapLimit": "Swap Limit"
+    "swapLimit": "Swap Limit",
+    "liveUsage": "Live Usage",
+    "cpuUsage": "CPU",
+    "memoryUsage": "Memory",
+    "loadingStats": "Loading usage...",
+    "noStatsAvailable": "No running container found for this resource"
   },
   "sortOptions": {
     "byName": "By Name",
