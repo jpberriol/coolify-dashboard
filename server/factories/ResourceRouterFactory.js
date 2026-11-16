@@ -122,7 +122,12 @@ export const createResourceRouter = (resourceType, options = {}) => {
         try {
           const uuid = encodeURIComponent(req.params.uuid);
           // Coolify's deploy endpoint queues a new deployment of the resource.
-          const data = await coolify.get(`/deploy?uuid=${uuid}&force=false`);
+          // Newer versions require POST (GET answers "endpoint has changed to
+          // a POST request"); uuid/force are sent as query and body.
+          const data = await coolify.post(`/deploy?uuid=${uuid}&force=false`, {
+            uuid: req.params.uuid,
+            force: false,
+          });
           res.json(data);
         } catch (error) {
           next(error);
