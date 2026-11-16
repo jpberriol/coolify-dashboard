@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { PlayIcon, StopIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlayIcon, StopIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
 
 const useResourceActions = (currentAction) => {
   const { t } = useTranslation();
@@ -11,8 +11,8 @@ const useResourceActions = (currentAction) => {
         return "green";
       case "stopping":
         return "yellow";
-      case "deleting":
-        return "red";
+      case "redeploying":
+        return "blue";
       default:
         return null;
     }
@@ -25,8 +25,8 @@ const useResourceActions = (currentAction) => {
         return PlayIcon;
       case "stopping":
         return StopIcon;
-      case "deleting":
-        return TrashIcon;
+      case "redeploying":
+        return RocketLaunchIcon;
       default:
         return null;
     }

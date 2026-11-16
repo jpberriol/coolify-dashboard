@@ -13,111 +13,161 @@ A modern, production-ready dashboard for monitoring Coolify applications, servic
 
 ## Quick Start
 
-### Docker Deployment
+### Docker
 
 ```bash
-docker pull torukobyte/coolify-dashboard:latest
+docker build -t coolify-dashboard .
 
 docker run -d -p 5000:5000 \
   --name coolify-dashboard \
   -e "ADMIN_USERNAME=admin" \
-  -e "ADMIN_PASSWORD=your_secure_password" \
-  -e "JWT_SECRET=your_jwt_secret_key" \
-  -e "ALLOWED_ORIGINS=https://dashboard.example.com" \
+  -e "ADMIN_PASSWORD=a_long_random_password" \
+  -e "JWT_SECRET=$(openssl rand -hex 48)" \
   -e "COOLIFY_BASE_URL=https://coolify.example.com" \
   -e "COOLIFY_TOKEN=your_coolify_api_token" \
   -e "DASHBOARD_USER_TYPE=admin" \
-  torukobyte/coolify-dashboard:latest
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v coolify-dashboard-data:/app/server/data \
+  coolify-dashboard
 ```
 
-Access the dashboard at `http://localhost:5000`
+Access the dashboard at `http://localhost:5000`.
+
+The two `-v` options are what enable live usage and keep the monitoring history. See [Volumes](#volumes).
 
 ---
 
 ## Installation on Coolify
 
-### Step 1: Create New Application
+### Step 1: Create the application
 
-Navigate to your Coolify instance and create a new application:
+- Click **Add New → Application** and pick your Git repository (this project).
+- Build pack: **Dockerfile** (the repository root `Dockerfile`).
+- Alternatively, use **Docker Image** with an image you built and pushed yourself.
 
-- Click **"Add New"** in the Coolify dashboard
-- Select **"Docker Image"** as the deployment type
-- Enter image name: `torukobyte/coolify-dashboard:latest`
+### Step 2: General configuration
 
-### Step 2: General Configuration
+- **Domain**: the domain you want for the dashboard, e.g. `https://dashboard.example.com`
+- **Ports Exposes**: `5000`
 
-Configure the basic settings:
+### Step 3: Environment variables
 
-- **Domain**: `dashboard.example.com`
-- **Port**: `5000`
-- Configure network and storage settings as needed
-
-### Step 3: Environment Variables
-
-Set the following required environment variables:
+Add these in **Environment Variables** (see [Environment Variables](#environment-variables) for the full list):
 
 ```env
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your_secure_password
-JWT_SECRET=your_jwt_secret_key
-ALLOWED_ORIGINS=https://dashboard.example.com
+ADMIN_PASSWORD=a_long_random_password
+JWT_SECRET=output_of__openssl_rand_-hex_48
 COOLIFY_BASE_URL=https://coolify.example.com
 COOLIFY_TOKEN=your_coolify_api_token
 DASHBOARD_USER_TYPE=admin
 ```
 
-### Step 4: Generate Coolify API Token
+The server refuses to start, and prints which variables are missing, if any of the five required ones is absent.
 
-**Important**: Before deploying, generate your Coolify API token with proper permissions based on your user type:
+### Step 4: Persistent storage (volumes)
 
-#### For Viewer Mode (Read-Only Access)
-1. Navigate to your Coolify instance settings
-2. Go to **API Tokens** section
-3. Click **"Create New Token"**
-4. Select the following permissions:
-   - **read**: Enable all read permissions
-   - **read:sensitive**: Enable sensitive data read access
-5. Copy the generated token and use it as `COOLIFY_TOKEN`
-6. Set `DASHBOARD_USER_TYPE=viewer` in environment variables
+Open **Persistent Storage** and add both. Details in [Volumes](#volumes).
 
-**Note**: The `read:sensitive` permission is required to access detailed resource information, including environment variables and sensitive configuration data.
+| Type         | Source / Name         | Destination (path in container) |
+| ------------ | --------------------- | ------------------------------- |
+| Bind mount   | `/var/run/docker.sock` | `/var/run/docker.sock`          |
+| Volume mount | `dashboard-data`      | `/app/server/data`              |
 
-#### For Admin Mode (Full Control)
-1. Navigate to your Coolify instance settings
-2. Go to **API Tokens** section
-3. Click **"Create New Token"**
-4. Select the following permissions:
-   - **write**: Enable all write permissions (includes read access)
-5. Copy the generated token and use it as `COOLIFY_TOKEN`
-6. Set `DASHBOARD_USER_TYPE=admin` in environment variables
+### Step 5: Create the Coolify API token
 
-**Note**: The `write` permission is **required** for admin features, which include:
-- Starting and stopping services
-- Deleting services
-- Viewing live service logs with filtering
-- All read operations available in viewer mode
+Create it in Coolify under **Keys & Tokens → API tokens** and copy it right away (it is shown only once).
 
-**Warning**: Only use admin mode with users you trust, as it grants full control over your Coolify services.
+| Mode                             | Token permissions                                   | `DASHBOARD_USER_TYPE` |
+| -------------------------------- | --------------------------------------------------- | --------------------- |
+| Viewer (read-only)               | `read`, `read:sensitive`                            | `viewer`              |
+| Admin (start / stop / redeploy / logs) | `read`, `read:sensitive`, `write`, `deploy`   | `admin`               |
 
-### Step 5: Deploy
+- `deploy` is needed for the **Redeploy** button (it calls Coolify's deploy endpoint).
+- Also make sure the API is enabled: **Settings → Advanced → API Access**.
+- If you restrict **Allowed IPs for API Access**, add the IP the dashboard connects from, otherwise Coolify answers `403`.
 
-- Save the configuration
-- Click **"Deploy"** to start the application
-- The dashboard will be available at your configured domain
+**Warning**: admin mode lets anyone who can log in start, stop and redeploy your applications.
+
+### Step 6: Deploy
+
+Save and click **Deploy**. Open your domain and log in with `ADMIN_USERNAME` / `ADMIN_PASSWORD`.
+
+---
+
+## Volumes
+
+The dashboard needs two mounts. Without them it still starts, but monitoring is incomplete or short-lived (it logs a warning at startup).
+
+### 1. Docker socket: `/var/run/docker.sock` (bind mount)
+
+- **Why**: Coolify's API does not expose real resource consumption. The dashboard reads it from Docker: live CPU/RAM per resource, network and disk I/O, container restarts, OOM kills, Docker health, and host CPU/RAM/disk.
+- **Mount**: source `/var/run/docker.sock` → destination `/var/run/docker.sock`. It is only used to read (list containers, stats, inspect); the dashboard never starts or stops containers through it.
+- **Without it**: the Live Usage columns, charts and host panel stay empty. Status, URL health checks, SSL checks and deployments still work (they use the Coolify API and the network).
+- **Scope**: it only sees containers of the server where the dashboard runs. Resources on other Coolify servers show no usage metrics.
+- **Security**: access to the Docker socket is powerful. Keep the dashboard behind a strong password and HTTPS.
+
+### 2. Data volume: `/app/server/data` (volume mount)
+
+- **Why**: monitoring history and incident events are kept in memory and saved here. Without a volume they are erased on every redeploy.
+- **Files**:
+  - `monitor-history.json`: metric history (10 s samples for 3 h, 1-minute averages for 3 days, 15-minute averages for 90 days). Saved every 10 minutes and on shutdown. About 650 KB per resource at full retention (roughly 20 MB for 30 resources).
+  - `monitor-events.json`: incidents timeline (up to 2000 events, 90 days).
+- **Mount**: a Docker *volume* (not a bind mount), e.g. name `dashboard-data` → `/app/server/data`.
+- **Custom path**: set `DATA_DIR` and mount the volume at that path instead.
+- **Reset history**: stop the app, delete the volume (or both files), start again.
 
 ---
 
 ## Environment Variables
 
-| Variable              | Description                                                       | Example                                 | Required | Default      |
-| --------------------- | ----------------------------------------------------------------- | --------------------------------------- | -------- | ------------ |
-| `ADMIN_USERNAME`      | Dashboard administrator username                                  | `admin`                                 | Yes      | -            |
-| `ADMIN_PASSWORD`      | Dashboard administrator password                                  | `secure_password`                       | Yes      | -            |
-| `JWT_SECRET`          | Secret key for JWT token generation                               | `random_secret_key`                     | Yes      | -            |
-| `ALLOWED_ORIGINS`     | CORS allowed origins (comma-separated for multiple)               | `https://dashboard.example.com` | Yes      | -            |
-| `COOLIFY_BASE_URL`    | Your Coolify instance base URL                                    | `https://coolify.example.com`   | Yes      | -            |
-| `COOLIFY_TOKEN`       | Coolify API token (read+read:sensitive for viewer, write for admin) | `your_api_token`                     | Yes      | -            |
-| `DASHBOARD_USER_TYPE` | User access level: `viewer` (read-only) or `admin` (full control) | `admin` or `viewer`                   | No       | `viewer`     |
+### Required
+
+The server exits at startup with a clear message if any of these is missing.
+
+| Variable           | Description                                                                 | Example                          |
+| ------------------ | --------------------------------------------------------------------------- | -------------------------------- |
+| `ADMIN_USERNAME`   | Dashboard login username                                                    | `admin`                          |
+| `ADMIN_PASSWORD`   | Dashboard login password. Use 12+ characters: it is the only protection.    | `a_long_random_password`         |
+| `JWT_SECRET`       | Secret that signs login tokens. Use 32+ random characters.                  | `openssl rand -hex 48`           |
+| `COOLIFY_BASE_URL` | Your Coolify URL. A trailing `/` or `/api/v1` is removed automatically. It must be reachable **from the container**. | `https://coolify.example.com` |
+| `COOLIFY_TOKEN`    | Coolify API token (permissions in [Step 5](#step-5-create-the-coolify-api-token)) | `1\|abc...`                     |
+
+### Optional
+
+| Variable              | Description                                                                                          | Default                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------ |
+| `DASHBOARD_USER_TYPE` | `viewer` (read-only) or `admin` (start, stop, redeploy, logs). Invalid values fall back to `viewer`. | `viewer`                 |
+| `ALLOWED_ORIGINS`     | Extra origins allowed by CORS, comma-separated. Not needed when the UI is served by the dashboard itself (same origin is always allowed). | `http://localhost:5173` |
+| `PORT`                | Port the server listens on                                                                           | `5000`                   |
+| `NODE_ENV`            | `production` or `development`. Only affects startup logging.                                          | `production`             |
+| `DATA_DIR`            | Folder for monitoring history and events. Mount a volume here.                                       | `/app/server/data`       |
+
+### Monitoring tuning (optional)
+
+| Variable                        | Description                                                              | Default  |
+| ------------------------------- | ------------------------------------------------------------------------ | -------- |
+| `MONITOR_RETENTION_DAYS`        | Days of history kept (also the maximum custom range)                     | `90`     |
+| `MONITOR_STATS_INTERVAL_MS`     | How often container/host metrics are sampled                             | `10000`  |
+| `MONITOR_RESOURCES_INTERVAL_MS` | How often resources are read from the Coolify API                        | `30000`  |
+| `MONITOR_HEALTH_INTERVAL_MS`    | How often public URLs are probed                                         | `30000`  |
+| `MONITOR_HISTORY_POINTS`        | Number of raw 10 s samples kept in memory (1080 = 3 h)                   | `1080`   |
+| `HOST_DISK_PATH`                | Path whose disk usage is reported as the host disk                       | `/`      |
+
+---
+
+## Troubleshooting
+
+| Symptom                                           | Cause and fix                                                                                                   |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Container exits with `Missing required environment variables` | Add the listed variables in Coolify and redeploy.                                                  |
+| `Cannot reach Coolify at ... (ENOTFOUND / ECONNREFUSED)` | `COOLIFY_BASE_URL` is wrong or not reachable from the container. Try the server IP and port.            |
+| `Coolify answered 401`                            | Invalid `COOLIFY_TOKEN`.                                                                                        |
+| `Coolify answered 403`                            | Token lacks permissions, or your IP is not in Coolify's *Allowed IPs for API Access*.                          |
+| Redeploy button fails with 403                    | The token needs the `deploy` permission (and `write`). Create a new token; permissions cannot be edited.       |
+| Live Usage / host panel empty                     | The Docker socket is not mounted. See [Volumes](#volumes).                                                      |
+| Incidents timeline / history empty after redeploy | The data volume is missing. See [Volumes](#volumes).                                                            |
+| Every URL shows as down                           | The container cannot reach your public domains (DNS or hairpin NAT). Check from inside the container.           |
 
 ---
 
@@ -125,14 +175,13 @@ DASHBOARD_USER_TYPE=admin
 
 - **Role-Based Access Control**: Viewer mode (read-only) and Admin mode (full control)
 - **Admin Service Management**:
-  - Start and stop services with one click
-  - Delete services directly from the dashboard
+  - Start and stop resources with one click
+  - Redeploy applications: pulls the latest code and deploys again, tracking the deployment until it finishes
   - View live service logs with real-time streaming
   - Filter logs with keyword search
   - Auto-scroll toggle for log viewing
   - Real-time action loading states with elapsed time indicators
   - Visual feedback with animated borders and icons
-  - Modern glassmorphism status banner with real-time elapsed time display
 - **Intelligent State Management**:
   - **Zustand Store**: Lightweight, centralized state management
   - **Adaptive Polling**: Smart polling intervals (5s → 30s) for resource efficiency
@@ -140,7 +189,7 @@ DASHBOARD_USER_TYPE=admin
   - **Silent Background Sync**: Updates data without disrupting user experience
   - **Action-Specific Loading**: Per-resource, per-action loading states
   - **Auto-Cleanup**: Prevents memory leaks with proper interval cleanup
-- **Sound Effects System**: Subtle audio feedback for button interactions with toggle control in bottom-right corner
+- **Sound Effects System**: Subtle audio feedback for button interactions with a toggle in the bottom-left corner
 - **Responsive Design**: Modern UI optimized for desktop and mobile devices
 - **Real-time Monitoring**: Track resource status and health in real-time
 - **Secure Authentication**: JWT-based authentication with secure token management
@@ -168,8 +217,9 @@ coolify-dashboard/
 │   │   ├── api/            # API client services
 │   │   ├── services/       # Business logic layer
 │   │   ├── utils/          # Utility functions
-│   │   └── i18n/           # Internationalization (EN/TR)
+│   │   └── i18n/           # Translations (English)
 ├── server/                 # Express backend application
+│   ├── config/             # Environment loading and validation
 │   ├── routes/             # API route definitions
 │   ├── middleware/         # Custom middleware
 │   ├── services/           # Backend services

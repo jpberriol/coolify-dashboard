@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./queryClient";
 import { lazy, Suspense } from "react";
 
 // Lazy load DevTools only in development to reduce bundle size
@@ -10,17 +11,6 @@ const ReactQueryDevtools =
         }))
       )
     : null;
-
-// Configure QueryClient with default options
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false, // Disable refetch on window focus
-      retry: 1, // Retry failed requests once
-      staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    },
-  },
-});
 
 export const QueryProvider = ({ children }) => {
   return (

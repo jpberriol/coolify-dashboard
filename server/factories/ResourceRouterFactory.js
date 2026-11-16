@@ -38,7 +38,7 @@ export const createResourceRouter = (resourceType, options = {}) => {
     enableStart = true,
     enableStop = true,
     enableRestart = true,
-    enableDelete = true,
+    enableRedeploy = false,
     enableLogs = false,
   } = options;
 
@@ -112,16 +112,17 @@ export const createResourceRouter = (resourceType, options = {}) => {
     );
   }
 
-  // DELETE: Delete resource
-  if (enableDelete) {
-    router.delete(
-      `/${resourceType}/:uuid`,
+  // POST: Redeploy (pull the latest code and deploy again). Applications only.
+  if (enableRedeploy) {
+    router.post(
+      `/${resourceType}/:uuid/redeploy`,
       verifyToken,
       checkAdminPermission,
       async (req, res, next) => {
         try {
-          const { uuid } = req.params;
-          const data = await coolify.delete(`/${resourceType}/${uuid}`);
+          const uuid = encodeURIComponent(req.params.uuid);
+          // Coolify's deploy endpoint queues a new deployment of the resource.
+          const data = await coolify.get(`/deploy?uuid=${uuid}&force=false`);
           res.json(data);
         } catch (error) {
           next(error);
@@ -161,7 +162,7 @@ export const RESOURCE_CONFIGS = {
     enableStart: true,
     enableStop: true,
     enableRestart: true,
-    enableDelete: true,
+    enableRedeploy: true,
     enableLogs: true,
   },
   services: {
@@ -169,7 +170,6 @@ export const RESOURCE_CONFIGS = {
     enableStart: true,
     enableStop: true,
     enableRestart: true,
-    enableDelete: true,
     enableLogs: false,
   },
   databases: {
@@ -177,7 +177,6 @@ export const RESOURCE_CONFIGS = {
     enableStart: true,
     enableStop: true,
     enableRestart: true,
-    enableDelete: true,
     enableLogs: false,
   },
 };

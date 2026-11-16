@@ -32,7 +32,7 @@ const ResourceCard = ({ resource }) => {
   const { t } = useTranslation();
   const { playSound } = useSoundEffects();
 
-  const { startResourceAction, stopResourceAction, deleteResourceAction } =
+  const { startResourceAction, stopResourceAction, redeployResourceAction } =
     useResourceStore();
 
   const {
@@ -90,8 +90,8 @@ const ResourceCard = ({ resource }) => {
       startResourceAction(resource.type, resource.uuid, t);
     } else if (confirmAction === "stop") {
       stopResourceAction(resource.type, resource.uuid, t);
-    } else if (confirmAction === "delete") {
-      deleteResourceAction(resource.type, resource.uuid, t);
+    } else if (confirmAction === "redeploy") {
+      redeployResourceAction(resource.type, resource.uuid, t);
     }
     setConfirmAction(null);
   };

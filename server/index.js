@@ -1,5 +1,5 @@
+import "./config/env.js";
 import express from "express";
-import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
@@ -9,8 +9,6 @@ import monitorRoutes from "./routes/monitor.js";
 import monitor from "./services/MonitorService.js";
 import { corsMiddleware } from "./middleware/cors.js";
 import { handleError } from "./utils/errorHandler.js";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

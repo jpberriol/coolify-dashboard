@@ -57,20 +57,6 @@ class CoolifyApiClient {
   }
 
   /**
-   * DELETE request to Coolify API
-   * @param {string} endpoint - API endpoint path
-   * @returns {Promise<any>} Response data
-   */
-  async delete(endpoint) {
-    try {
-      const response = await this.client.delete(endpoint);
-      return response.data;
-    } catch (error) {
-      this._handleError(error, "DELETE", endpoint);
-    }
-  }
-
-  /**
    * Centralized error handling
    * @private
    */

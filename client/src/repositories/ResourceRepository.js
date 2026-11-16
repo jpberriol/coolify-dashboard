@@ -52,8 +52,8 @@ class ResourceRepository {
     return await this.client.post(`/${type}s/${uuid}/stop`);
   }
 
-  async delete(type, uuid) {
-    return await this.client.delete(`/${type}s/${uuid}`);
+  async redeploy(type, uuid) {
+    return await this.client.post(`/${type}s/${uuid}/redeploy`);
   }
 
   async getLogs(type, uuid) {

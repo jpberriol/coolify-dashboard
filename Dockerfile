@@ -36,6 +36,9 @@ COPY --from=backend-builder /app/package*.json ./
 
 WORKDIR /app/server
 
+# Monitoring history/events live here; mount a volume on this path.
+RUN mkdir -p /app/server/data
+
 ENV NODE_ENV=production
 ENV PORT=5000
 

@@ -4,8 +4,8 @@ import {
   PlayIcon,
   StopIcon,
   ArrowPathIcon,
-  TrashIcon,
-  ExclamationTriangleIcon,
+  RocketLaunchIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useSoundEffects } from "../../hooks/useSoundEffects";
 import { SOUND_TYPES } from "../../utils/soundUtils";
@@ -36,13 +36,13 @@ const ConfirmActionModal = ({ action, resourceName, onConfirm, onClose }) => {
       confirmBg: "bg-blue-600 hover:bg-blue-700",
       message: t("admin.confirmRestart", { name: resourceName }),
     },
-    delete: {
-      icon: TrashIcon,
-      iconColor: "text-red-400",
-      iconBg: "bg-red-500/20",
-      confirmBg: "bg-red-600 hover:bg-red-700",
-      message: t("admin.confirmDelete", { name: resourceName }),
-      isDestructive: true,
+    redeploy: {
+      icon: RocketLaunchIcon,
+      iconColor: "text-blue-400",
+      iconBg: "bg-blue-500/20",
+      confirmBg: "bg-blue-600 hover:bg-blue-500",
+      message: t("admin.confirmRedeploy", { name: resourceName }),
+      note: t("admin.redeployNote"),
     },
   };
 
@@ -82,7 +82,7 @@ const ConfirmActionModal = ({ action, resourceName, onConfirm, onClose }) => {
       onClick={handleClose}
     >
       <div
-        className="bg-[#1e1a3c] rounded-xl border border-slate-800 max-w-md w-full"
+        className="bg-slate-900 rounded-xl border border-slate-800 max-w-md w-full"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
@@ -96,10 +96,10 @@ const ConfirmActionModal = ({ action, resourceName, onConfirm, onClose }) => {
               {config.message}
             </h3>
           </div>
-          {config.isDestructive && (
-            <div className="flex items-center gap-2 mb-4 text-sm text-red-300 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-              <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />
-              <span>{t("admin.deleteWarning")}</span>
+          {config.note && (
+            <div className="flex items-start gap-2 mb-4 text-sm text-blue-200 bg-blue-500/10 p-3 rounded-lg border border-blue-500/20">
+              <InformationCircleIcon className="w-5 h-5 flex-shrink-0" />
+              <span>{config.note}</span>
             </div>
           )}
           <div className="flex gap-3">

@@ -5,7 +5,7 @@ import { RESOURCE_TYPES } from "../../../constants/resourceTypes";
 import {
   PlayIcon,
   StopIcon,
-  TrashIcon,
+  RocketLaunchIcon,
   DocumentTextIcon,
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
@@ -147,15 +147,17 @@ const ResourceCardFooter = ({
                   </button>
                 )}
 
-                {/* Delete Button */}
-                <button
-                  onClick={(e) => handleClick(e, () => onActionClick("delete"))}
-                  disabled={!!currentAction}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/40 disabled:bg-red-500/10 text-red-200 disabled:text-red-400 rounded-lg border border-red-500/40 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                  <span className="hidden md:inline">{t("admin.delete")}</span>
-                </button>
+                {/* Redeploy Button - Only for Applications */}
+                {resource.type === RESOURCE_TYPES.APPLICATION && (
+                  <button
+                    onClick={(e) => handleClick(e, () => onActionClick("redeploy"))}
+                    disabled={!!currentAction}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg border border-blue-500 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <RocketLaunchIcon className="w-4 h-4" />
+                    <span className="hidden md:inline">{t("admin.redeploy")}</span>
+                  </button>
+                )}
               </>
             )}
           </div>
