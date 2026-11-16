@@ -17,7 +17,7 @@ const usageBarColor = (percent) => {
 const fetchStats = (resourceUuid) => apiClient.get(`/stats/${resourceUuid}`);
 
 const UsageBar = ({ label, icon: Icon, percent, detail }) => (
-  <div className="bg-slate-800/50 rounded-lg p-3">
+  <div className="bg-slate-800/60 rounded-lg p-3">
     <div className="flex items-center justify-between mb-2">
       <div className="flex items-center gap-1.5">
         <Icon className="w-4 h-4 text-emerald-400" />
@@ -54,7 +54,7 @@ const ResourceStats = ({ resourceUuid }) => {
   });
 
   return (
-    <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+    <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
       <div className="flex items-center gap-2 mb-3">
         <ChartBarIcon className="w-5 h-5 text-emerald-400" />
         <span className="text-sm font-semibold text-white">

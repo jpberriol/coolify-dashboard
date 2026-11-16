@@ -2,12 +2,12 @@ import axios from "axios";
 import { AppError } from "../utils/errorHandler.js";
 
 /**
- * CoolifyApiClient - Coolify API ile iletişim için soyutlanmış HTTP client
+ * CoolifyApiClient - thin HTTP client for the Coolify API
  *
  * SOLID Principles:
- * - Single Responsibility: Sadece Coolify API ile HTTP iletişiminden sorumlu
- * - Dependency Inversion: Axios'un soyutlanmış bir interface'i
- * - Open/Closed: Yeni methodlar eklenebilir, mevcut kod değişmeden
+ * - Single Responsibility: only talks HTTP to the Coolify API
+ * - Dependency Inversion: wraps axios behind a small interface
+ * - Open/Closed: new methods can be added without touching existing ones
  */
 class CoolifyApiClient {
   constructor() {

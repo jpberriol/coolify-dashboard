@@ -16,11 +16,13 @@ import {
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { copyToClipboard } from "../../utils/clipboardUtils";
-import { getDatabasePassword } from "../../utils/resourceUtils";
+
+// Never render the credential part of a connection string (user:password@).
+const maskCredentials = (url) =>
+  String(url).replace(/(:\/\/[^:/@\s]*:)[^@/\s]*@/, "$1••••••@");
 
 const DatabaseInfo = ({ resource }) => {
   const { t } = useTranslation();
-  const [showPassword, setShowPassword] = useState(false);
   const [showInternalUrl, setShowInternalUrl] = useState(false);
   const [showExternalUrl, setShowExternalUrl] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
@@ -32,17 +34,6 @@ const DatabaseInfo = ({ resource }) => {
       setTimeout(() => setCopiedField(null), 2000);
     }
   };
-
-  const password = getDatabasePassword(resource);
-
-  useEffect(() => {
-    if (showPassword) {
-      const timer = setTimeout(() => {
-        setShowPassword(false);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [showPassword]);
 
   useEffect(() => {
     if (showInternalUrl) {
@@ -65,20 +56,20 @@ const DatabaseInfo = ({ resource }) => {
   return (
     <div className="space-y-4">
       {resource.internal_db_url && (
-        <div className="bg-slate-900/50 rounded-lg p-4 border border-purple-500/30">
+        <div className="bg-slate-900 rounded-lg p-4 border border-blue-500/30">
           <div className="flex items-center justify-between mb-3">
             <div
               className="flex items-center gap-2 cursor-help"
               data-tooltip-id="internal-url-tooltip"
               data-tooltip-content={t("tooltips.internalConnection")}
             >
-              <LockClosedIcon className="w-5 h-5 text-purple-400" />
+              <LockClosedIcon className="w-5 h-5 text-blue-400" />
               <span className="text-sm font-semibold text-white">
                 {t("resourceCard.internalConnectionAddress")}
               </span>
             </div>
             <span
-              className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded border border-purple-500/30 cursor-help"
+              className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded border border-blue-500/30 cursor-help"
               data-tooltip-id="internal-url-tooltip"
               data-tooltip-content={t("tooltips.internalConnection")}
             >
@@ -89,7 +80,7 @@ const DatabaseInfo = ({ resource }) => {
           <div className="flex items-center justify-between gap-4 bg-slate-800/50 px-3 py-2 rounded">
             <span className="flex-1 text-sm text-slate-300 font-mono break-all">
               {showInternalUrl
-                ? resource.internal_db_url
+                ? maskCredentials(resource.internal_db_url)
                 : "•••••••••••••••••••"}
             </span>
 
@@ -126,7 +117,7 @@ const DatabaseInfo = ({ resource }) => {
       )}
 
       {resource.external_db_url && (
-        <div className="bg-slate-900/50 rounded-lg p-4 border border-cyan-500/30">
+        <div className="bg-slate-900 rounded-lg p-4 border border-cyan-500/30">
           <div className="flex items-center justify-between mb-3">
             <div
               className="flex items-center gap-2 cursor-help"
@@ -150,7 +141,7 @@ const DatabaseInfo = ({ resource }) => {
           <div className="flex items-center justify-between gap-4 bg-slate-800/50 px-3 py-2 rounded">
             <span className="flex-1 text-sm text-slate-300 font-mono break-all">
               {showExternalUrl
-                ? resource.external_db_url
+                ? maskCredentials(resource.external_db_url)
                 : "•••••••••••••••••••"}
             </span>
 
@@ -186,62 +177,9 @@ const DatabaseInfo = ({ resource }) => {
         </div>
       )}
 
-      <div
-        className={`grid grid-cols-1 ${password ? "md:grid-cols-2" : "md:grid-cols-3"} gap-4`}
-      >
-        {password && (
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-amber-500/30">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <ShieldCheckIcon className="w-5 h-5 text-amber-400" />
-                <span className="text-sm font-semibold text-white">
-                  {t("resourceCard.databasePassword")}
-                </span>
-              </div>
-              <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">
-                {t("resourceCard.critical")}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between gap-4 bg-slate-800/50 px-3 py-2 rounded">
-              <span className="flex-1 text-sm text-slate-300 font-mono break-all">
-                {showPassword ? password : "••••••••••••••••"}
-              </span>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowPassword(!showPassword);
-                  }}
-                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition cursor-pointer"
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="w-4 h-4" />
-                  ) : (
-                    <EyeIcon className="w-4 h-4" />
-                  )}
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCopy(password, "password");
-                  }}
-                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition cursor-pointer"
-                >
-                  {copiedField === "password" ? (
-                    <CheckIcon className="w-4 h-4 text-green-400" />
-                  ) : (
-                    <ClipboardDocumentIcon className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
-          className={`bg-slate-900/50 rounded-lg p-4 border ${
+          className={`bg-slate-900 rounded-lg p-4 border ${
             resource.backup_configs && resource.backup_configs.length > 0
               ? "border-green-500/30"
               : "border-orange-500/30"
@@ -275,7 +213,7 @@ const DatabaseInfo = ({ resource }) => {
             <div className="inline-flex items-center gap-2 bg-slate-800/50 px-3 py-2 rounded">
               <CheckCircleIcon className="w-5 h-5 text-green-400" />
               <span className="text-sm text-green-300">
-                {resource.backup_configs.length} aktif
+                {resource.backup_configs.length} active
               </span>
             </div>
           ) : (
@@ -292,7 +230,7 @@ const DatabaseInfo = ({ resource }) => {
           )}
         </div>
 
-        <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+        <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
           <div className="flex items-center gap-2 mb-3">
             <GlobeAltIcon className="w-5 h-5 text-cyan-400" />
             <span className="text-sm font-semibold text-white">
@@ -318,7 +256,7 @@ const DatabaseInfo = ({ resource }) => {
           </div>
         </div>
 
-        <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+        <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
           <div className="flex items-center gap-2 mb-3">
             <ShieldCheckIcon className="w-5 h-5 text-emerald-400" />
             <span className="text-sm font-semibold text-white">
@@ -351,9 +289,9 @@ const DatabaseInfo = ({ resource }) => {
         resource.limits_memory_swap ||
         resource.limits_memory_reservation ||
         resource.limits_cpuset) && (
-        <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+        <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
           <div className="flex items-center gap-2 mb-3">
-            <CpuChipIcon className="w-5 h-5 text-indigo-400" />
+            <CpuChipIcon className="w-5 h-5 text-blue-400" />
             <span className="text-sm font-semibold text-white">
               {t("resourceCard.resourceLimits")}
             </span>

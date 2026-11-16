@@ -8,7 +8,7 @@ import { RESOURCE_TYPES } from "../../../constants/resourceTypes";
 
 const ResourceCardBody = ({ resource }) => {
   return (
-    <div className="bg-slate-800/30 border-t border-white/10 px-3 md:px-8 py-4 md:py-6">
+    <div className="bg-slate-950/60 border-t border-slate-800 px-3 md:px-8 py-4 md:py-6">
       {/* Common resource details */}
       <ResourceDetails resource={resource} />
 

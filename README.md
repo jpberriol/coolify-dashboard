@@ -9,7 +9,7 @@
 ![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)
 
-A modern, production-ready dashboard for monitoring Coolify applications, services, and databases with comprehensive multi-language support.
+A modern, production-ready dashboard for monitoring Coolify applications, services, and databases.
 
 ## Quick Start
 
@@ -23,8 +23,8 @@ docker run -d -p 5000:5000 \
   -e "ADMIN_USERNAME=admin" \
   -e "ADMIN_PASSWORD=your_secure_password" \
   -e "JWT_SECRET=your_jwt_secret_key" \
-  -e "ALLOWED_ORIGINS=https://dashboard.kalayciburak.com.tr" \
-  -e "COOLIFY_BASE_URL=https://coolify.kalayciburak.com.tr" \
+  -e "ALLOWED_ORIGINS=https://dashboard.example.com" \
+  -e "COOLIFY_BASE_URL=https://coolify.example.com" \
   -e "COOLIFY_TOKEN=your_coolify_api_token" \
   -e "DASHBOARD_USER_TYPE=admin" \
   torukobyte/coolify-dashboard:latest
@@ -48,7 +48,7 @@ Navigate to your Coolify instance and create a new application:
 
 Configure the basic settings:
 
-- **Domain**: `dashboard.kalayciburak.com.tr`
+- **Domain**: `dashboard.example.com`
 - **Port**: `5000`
 - Configure network and storage settings as needed
 
@@ -60,8 +60,8 @@ Set the following required environment variables:
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=your_secure_password
 JWT_SECRET=your_jwt_secret_key
-ALLOWED_ORIGINS=https://dashboard.kalayciburak.com.tr
-COOLIFY_BASE_URL=https://coolify.kalayciburak.com.tr
+ALLOWED_ORIGINS=https://dashboard.example.com
+COOLIFY_BASE_URL=https://coolify.example.com
 COOLIFY_TOKEN=your_coolify_api_token
 DASHBOARD_USER_TYPE=admin
 ```
@@ -107,34 +107,6 @@ DASHBOARD_USER_TYPE=admin
 
 ---
 
-## Screenshots
-
-### Login Screen
-
-![Login Screen](https://raw.githubusercontent.com/kalayciburak/coolify-dashboard/master/docs/screenshots/1.png)
-
-### Application Overview
-
-![Application Overview](https://raw.githubusercontent.com/kalayciburak/coolify-dashboard/master/docs/screenshots/3.png)
-
-### Real-time log monitoring with filtering
-
-![Real-time log monitoring with filtering](https://raw.githubusercontent.com/kalayciburak/coolify-dashboard/master/docs/screenshots/4.png)
-
-### Services Overview
-
-![Services Overview](https://raw.githubusercontent.com/kalayciburak/coolify-dashboard/master/docs/screenshots/5.png)
-
-### Services Details
-
-![Services Details](https://raw.githubusercontent.com/kalayciburak/coolify-dashboard/master/docs/screenshots/6.png)
-
-### Database Configuration
-
-![Database Details](https://raw.githubusercontent.com/kalayciburak/coolify-dashboard/master/docs/screenshots/7.png)
-
----
-
 ## Environment Variables
 
 | Variable              | Description                                                       | Example                                 | Required | Default      |
@@ -142,16 +114,10 @@ DASHBOARD_USER_TYPE=admin
 | `ADMIN_USERNAME`      | Dashboard administrator username                                  | `admin`                                 | Yes      | -            |
 | `ADMIN_PASSWORD`      | Dashboard administrator password                                  | `secure_password`                       | Yes      | -            |
 | `JWT_SECRET`          | Secret key for JWT token generation                               | `random_secret_key`                     | Yes      | -            |
-| `ALLOWED_ORIGINS`     | CORS allowed origins (comma-separated for multiple)               | `https://dashboard.kalayciburak.com.tr` | Yes      | -            |
-| `COOLIFY_BASE_URL`    | Your Coolify instance base URL                                    | `https://coolify.kalayciburak.com.tr`   | Yes      | -            |
+| `ALLOWED_ORIGINS`     | CORS allowed origins (comma-separated for multiple)               | `https://dashboard.example.com` | Yes      | -            |
+| `COOLIFY_BASE_URL`    | Your Coolify instance base URL                                    | `https://coolify.example.com`   | Yes      | -            |
 | `COOLIFY_TOKEN`       | Coolify API token (read+read:sensitive for viewer, write for admin) | `your_api_token`                     | Yes      | -            |
 | `DASHBOARD_USER_TYPE` | User access level: `viewer` (read-only) or `admin` (full control) | `admin` or `viewer`                   | No       | `viewer`     |
-
----
-
-## Motivation
-
-While using Coolify, I found myself constantly clicking through each application and service individually just to view their URLs and basic information. This repetitive process became tedious when managing multiple resources. I thought, "Why not build a simple, elegant solution that displays everything at a glance?" This dashboard was born from that need—a centralized view to monitor all resources efficiently. If others find it useful too, that's even better.
 
 ---
 
@@ -167,7 +133,6 @@ While using Coolify, I found myself constantly clicking through each application
   - Real-time action loading states with elapsed time indicators
   - Visual feedback with animated borders and icons
   - Modern glassmorphism status banner with real-time elapsed time display
-  - Localized time format (shows "1d 30s" in Turkish, "1m 30s" in English)
 - **Intelligent State Management**:
   - **Zustand Store**: Lightweight, centralized state management
   - **Adaptive Polling**: Smart polling intervals (5s → 30s) for resource efficiency
@@ -176,7 +141,6 @@ While using Coolify, I found myself constantly clicking through each application
   - **Action-Specific Loading**: Per-resource, per-action loading states
   - **Auto-Cleanup**: Prevents memory leaks with proper interval cleanup
 - **Sound Effects System**: Subtle audio feedback for button interactions with toggle control in bottom-right corner
-- **Multi-language Support**: Seamless switching between English and Turkish
 - **Responsive Design**: Modern UI optimized for desktop and mobile devices
 - **Real-time Monitoring**: Track resource status and health in real-time
 - **Secure Authentication**: JWT-based authentication with secure token management
@@ -227,7 +191,7 @@ coolify-dashboard/
 
 ```bash
 # Clone the repository
-git clone https://github.com/kalayciburak/coolify-dashboard.git
+git clone https://github.com/jpberriol/coolify-dashboard.git
 
 # Navigate to project directory
 cd coolify-dashboard
@@ -282,4 +246,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Support
 
-For bug reports, feature requests, or questions, please open an issue on [GitHub](https://github.com/kalayciburak/coolify-dashboard/issues).
+For bug reports, feature requests, or questions, please open an issue on [GitHub](https://github.com/jpberriol/coolify-dashboard/issues).

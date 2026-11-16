@@ -20,7 +20,7 @@ const ResourceDetails = ({ resource }) => {
   return (
     <div className="space-y-4 md:space-y-6">
       {resource.description && (
-        <div className="bg-slate-900/50 rounded-lg p-3 md:p-4 border border-white/10">
+        <div className="bg-slate-900 rounded-lg p-3 md:p-4 border border-slate-800">
           <div className="flex items-center gap-2 mb-2 md:mb-3">
             <InformationCircleIcon className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
             <span className="text-sm font-semibold text-white">
@@ -35,7 +35,7 @@ const ResourceDetails = ({ resource }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {(resource.git_repository || resource.git_branch) && (
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+          <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
             <div className="flex items-center gap-2 mb-3">
               <CodeBracketIcon className="w-5 h-5 text-cyan-400" />
               <span className="text-sm font-semibold text-white">
@@ -63,9 +63,9 @@ const ResourceDetails = ({ resource }) => {
         )}
 
         {dockerImage && (
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+          <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
             <div className="flex items-center gap-2 mb-3">
-              <CubeIcon className="w-5 h-5 text-purple-400" />
+              <CubeIcon className="w-5 h-5 text-blue-400" />
               <span className="text-sm font-semibold text-white">
                 Docker Image
               </span>
@@ -77,7 +77,7 @@ const ResourceDetails = ({ resource }) => {
         )}
 
         {resource.status && (
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+          <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
             <div className="flex items-center gap-2 mb-3">
               <HeartIcon className="w-5 h-5 text-cyan-400" />
               <span className="text-sm font-semibold text-white">
@@ -92,9 +92,9 @@ const ResourceDetails = ({ resource }) => {
         )}
 
         {resource.destination?.server && (
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+          <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
             <div className="flex items-center gap-2 mb-3">
-              <ServerIcon className="w-5 h-5 text-pink-400" />
+              <ServerIcon className="w-5 h-5 text-sky-400" />
               <span className="text-sm font-semibold text-white">Server</span>
             </div>
             <p className="text-sm text-slate-300 font-mono bg-slate-800/50 px-3 py-2 rounded">
@@ -104,7 +104,7 @@ const ResourceDetails = ({ resource }) => {
         )}
 
         {resource.destination?.network && (
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+          <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
             <div className="flex items-center gap-2 mb-3">
               <SignalIcon className="w-5 h-5 text-teal-400" />
               <span className="text-sm font-semibold text-white">Network</span>
@@ -119,9 +119,9 @@ const ResourceDetails = ({ resource }) => {
           resource.internal_port ||
           resource.ports_exposes ||
           resource.ports_mappings) && (
-          <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+          <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
             <div className="flex items-center gap-2 mb-3">
-              <ArrowUpOnSquareIcon className="w-5 h-5 text-indigo-400" />
+              <ArrowUpOnSquareIcon className="w-5 h-5 text-blue-400" />
               <span className="text-sm font-semibold text-white">Ports</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -133,8 +133,8 @@ const ResourceDetails = ({ resource }) => {
               )}
               {resource.internal_port && (
                 <p className="text-sm text-slate-300 font-mono bg-slate-800/50 px-3 py-2 rounded">
-                  <span className="text-purple-400">Private:</span>{" "}
-                  <span className="text-purple-300">
+                  <span className="text-blue-400">Private:</span>{" "}
+                  <span className="text-blue-300">
                     {resource.internal_port}
                   </span>
                 </p>
@@ -142,7 +142,7 @@ const ResourceDetails = ({ resource }) => {
               {resource.ports_exposes && (
                 <p className="text-sm text-slate-300 font-mono bg-slate-800/50 px-3 py-2 rounded">
                   <span className="text-slate-400">Exposed:</span>{" "}
-                  <span className="text-indigo-400">
+                  <span className="text-blue-400">
                     {resource.ports_exposes}
                   </span>
                 </p>

@@ -82,7 +82,7 @@ const ConfirmActionModal = ({ action, resourceName, onConfirm, onClose }) => {
       onClick={handleClose}
     >
       <div
-        className="bg-[#1e1a3c] rounded-xl border border-white/10 max-w-md w-full"
+        className="bg-[#1e1a3c] rounded-xl border border-slate-800 max-w-md w-full"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
@@ -105,7 +105,7 @@ const ConfirmActionModal = ({ action, resourceName, onConfirm, onClose }) => {
           <div className="flex gap-3">
             <button
               onClick={handleClose}
-              className="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-white/10 transition font-medium cursor-pointer text-sm"
+              className="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-lg border border-slate-800 transition font-medium cursor-pointer text-sm"
             >
               {t("modals.cancel")}
             </button>

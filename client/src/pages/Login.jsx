@@ -46,10 +46,13 @@ const Login = () => {
   const isFormValid = username.trim() !== "" && password.trim() !== "";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-4">
-      <div className="bg-white/1 backdrop-blur-lg p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
-        <div className="mb-12 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+      <div className="bg-slate-900 p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border border-slate-800">
+        <div className="mb-10 text-center">
+          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-2xl text-white">
+            ◈
+          </span>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
             {t("dashboard.title")}
           </h1>
         </div>
@@ -63,7 +66,7 @@ const Login = () => {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2.5 md:px-4 md:py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition text-base"
+              className="w-full px-3 py-2.5 md:px-4 md:py-3 bg-white/5 border border-slate-800 rounded-lg text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-base"
               placeholder={t("auth.username")}
               required
             />
@@ -78,7 +81,7 @@ const Login = () => {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2.5 md:px-4 md:py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition text-base pr-12 overflow-hidden text-ellipsis"
+                className="w-full px-3 py-2.5 md:px-4 md:py-3 bg-white/5 border border-slate-800 rounded-lg text-white placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-base pr-12 overflow-hidden text-ellipsis"
                 placeholder={t("auth.password")}
                 required
               />
@@ -103,16 +106,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={!isFormValid || loading}
-            className={`w-full cursor-pointer
-              bg-gradient-to-r from-purple-500 to-indigo-600
-              text-white py-2.5 md:py-3 rounded-lg font-semibold
-              transition duration-200 shadow-lg transform
-              hover:-translate-y-0.5 hover:from-purple-400 hover:to-indigo-500 hover:shadow-xl
-              active:from-purple-700 active:to-indigo-800
-              disabled:opacity-50 disabled:cursor-not-allowed
-              disabled:hover:from-purple-500 disabled:hover:to-indigo-600
-              disabled:hover:translate-y-0 disabled:hover:shadow-lg
-              touch-manipulation`}
+            className="w-full cursor-pointer bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white py-2.5 md:py-3 rounded-lg font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 touch-manipulation"
           >
             {loading ? t("common.loading") : t("auth.login")}
           </button>

@@ -22,11 +22,16 @@ const STATS_INTERVAL_MS = num("MONITOR_STATS_INTERVAL_MS", 10000);
 const RESOURCES_INTERVAL_MS = num("MONITOR_RESOURCES_INTERVAL_MS", 30000);
 const HEALTH_INTERVAL_MS = num("MONITOR_HEALTH_INTERVAL_MS", 30000);
 const SSL_INTERVAL_MS = 60 * 60 * 1000;
-const HISTORY_POINTS = num("MONITOR_HISTORY_POINTS", 720); // 2h @ 10s
+const HISTORY_POINTS = num("MONITOR_HISTORY_POINTS", 1080); // 3h @ 10s
+const RETENTION_HOURS = num("MONITOR_RETENTION_HOURS", 72);
+const MINUTE_POINTS = RETENTION_HOURS * 60; // 1-minute averages
+const HISTORY_SAVE_MS = 5 * 60 * 1000;
+const HOST_KEY = "__host__";
 const HEALTH_HISTORY = 120;
 const MAX_EVENTS = 500;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../data");
 const EVENTS_FILE = path.join(DATA_DIR, "monitor-events.json");
+const HISTORY_FILE = path.join(DATA_DIR, "monitor-history.json");
 
 const SSL_WARN_DAYS = 14;
 const SSL_CRIT_DAYS = 3;
@@ -72,6 +77,10 @@ class MonitorService {
     this.ssl = new Map(); // host -> result
     this.sslAlerted = new Map(); // host -> 'warn'|'crit'
 
+    this.minute = new Map(); // key -> 1-minute averaged points (long range)
+    this.acc = new Map(); // key -> accumulator for the minute in progress
+    this._loadHistory();
+
     this.events = this._loadEvents();
     this.diskAlerted = null;
     this._saveTimer = null;
@@ -105,6 +114,19 @@ class MonitorService {
     loop("stats", this._collectStats, STATS_INTERVAL_MS);
     loop("health", this._runHealthChecks, HEALTH_INTERVAL_MS);
     loop("ssl", this._runSslChecks, SSL_INTERVAL_MS);
+
+    const saver = setInterval(() => this._saveHistory(), HISTORY_SAVE_MS);
+    saver.unref?.();
+    this.timers.push(saver);
+    const flush = () => this._saveHistory();
+    process.once("SIGTERM", () => {
+      flush();
+      process.exit(0);
+    });
+    process.once("SIGINT", () => {
+      flush();
+      process.exit(0);
+    });
   }
 
   stop() {
@@ -389,6 +411,69 @@ class MonitorService {
     }
     arr.push(sample);
     if (arr.length > HISTORY_POINTS) arr.splice(0, arr.length - HISTORY_POINTS);
+    this._rollup(key, sample);
+  }
+
+  /** Averages raw samples into 1-minute points kept for RETENTION_HOURS. */
+  _rollup(key, sample) {
+    const minute = Math.floor(sample.t / 60000) * 60000;
+    let acc = this.acc.get(key);
+
+    if (acc && acc.minute !== minute) {
+      const point = { t: acc.minute };
+      for (const [k, total] of Object.entries(acc.sum)) {
+        point[k] = Math.round((total / acc.n) * 10) / 10;
+      }
+      let arr = this.minute.get(key);
+      if (!arr) {
+        arr = [];
+        this.minute.set(key, arr);
+      }
+      arr.push(point);
+      if (arr.length > MINUTE_POINTS) arr.splice(0, arr.length - MINUTE_POINTS);
+      acc = null;
+    }
+
+    if (!acc) {
+      acc = { minute, n: 0, sum: {} };
+      this.acc.set(key, acc);
+    }
+    acc.n += 1;
+    for (const [k, v] of Object.entries(sample)) {
+      if (k !== "t") acc.sum[k] = (acc.sum[k] || 0) + v;
+    }
+  }
+
+  _loadHistory() {
+    try {
+      if (!fs.existsSync(HISTORY_FILE)) return;
+      const parsed = JSON.parse(fs.readFileSync(HISTORY_FILE, "utf8"));
+      const since = Date.now() - RETENTION_HOURS * 3600000;
+      for (const [key, points] of Object.entries(parsed.minute || {})) {
+        const fresh = points.filter((p) => p.t >= since);
+        if (fresh.length) this.minute.set(key, fresh.slice(-MINUTE_POINTS));
+      }
+    } catch (error) {
+      console.warn("[monitor] could not load history:", error.message);
+    }
+  }
+
+  _saveHistory() {
+    try {
+      const out = {};
+      for (const [key, points] of this.minute) {
+        // Drop history of resources that no longer exist.
+        if (key !== HOST_KEY && this.resourcesLoaded && !this.resources.has(key)) continue;
+        out[key] = points;
+      }
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+      fs.writeFileSync(
+        HISTORY_FILE,
+        JSON.stringify({ savedAt: Date.now(), minute: out })
+      );
+    } catch (error) {
+      console.warn("[monitor] could not persist history:", error.message);
+    }
   }
 
   async _collectHost() {
@@ -462,6 +547,7 @@ class MonitorService {
     if (this.hostHistory.length > HISTORY_POINTS) {
       this.hostHistory.splice(0, this.hostHistory.length - HISTORY_POINTS);
     }
+    this._rollup(HOST_KEY, this.hostHistory[this.hostHistory.length - 1]);
 
     if (disk) {
       const level = disk.percent >= 90 ? "crit" : disk.percent >= 80 ? "warn" : null;
@@ -575,20 +661,37 @@ class MonitorService {
       const bucket = samples.slice(i, i + size);
       const avg = { t: bucket[bucket.length - 1].t };
       for (const k of keys) {
-        avg[k] = Math.round((bucket.reduce((a, s) => a + s[k], 0) / bucket.length) * 10) / 10;
+        avg[k] = Math.round((bucket.reduce((a, s) => a + (s[k] || 0), 0) / bucket.length) * 10) / 10;
       }
       out.push(avg);
     }
     return out;
   }
 
-  _slice(samples, minutes) {
-    const since = Date.now() - minutes * 60000;
-    return samples.filter((s) => s.t >= since);
+  /**
+   * Samples of `key` inside [from, to]. Uses the raw 10 s series when it
+   * reaches back far enough, otherwise the 1-minute series.
+   */
+  _series(rawMap, key, range) {
+    const raw = (rawMap === "host" ? this.hostHistory : this.history.get(key)) || [];
+    const inRange = (arr) => arr.filter((p) => p.t >= range.from && p.t <= range.to);
+    if (raw.length && raw[0].t <= range.from) return inRange(raw);
+
+    const minute = this.minute.get(key) || [];
+    if (minute.length) return inRange(minute);
+    return inRange(raw);
   }
 
-  getResourceDetail(uuid, minutes = 60) {
-    const samples = this._slice(this.history.get(uuid) || [], minutes);
+  _normalizeRange(range) {
+    const now = Date.now();
+    const to = Math.min(range?.to ?? now, now);
+    const from = range?.from ?? to - 60 * 60000;
+    return { from, to };
+  }
+
+  getResourceDetail(uuid, range) {
+    const r = this._normalizeRange(range);
+    const samples = this._series("res", uuid, r);
     const h = this.health.get(uuid);
     const resource = this.resources.get(uuid);
     const urls = resource?.urls || [];
@@ -611,7 +714,7 @@ class MonitorService {
     }
 
     return {
-      intervalSec: STATS_INTERVAL_MS / 1000,
+      range: r,
       history: this._downsample(samples, 120, ["cpu", "mem", "memPct", "rx", "tx", "br", "bw"]),
       container: this.containers.get(uuid) || null,
       health: h
@@ -628,16 +731,47 @@ class MonitorService {
     };
   }
 
-  getHost(minutes = 60) {
+  getHost(range) {
+    const r = this._normalizeRange(range);
     return {
       current: this.host,
-      intervalSec: STATS_INTERVAL_MS / 1000,
-      history: this._downsample(this._slice(this.hostHistory, minutes), 120, [
+      range: r,
+      history: this._downsample(this._series("host", HOST_KEY, r), 120, [
         "cpu",
         "mem",
         "disk",
       ]),
     };
+  }
+
+  /**
+   * Compact live usage for every resource, shown on the list rows:
+   * latest CPU/RAM plus a short series and the peak for the chosen range.
+   */
+  getUsageSummary(range) {
+    const r = this._normalizeRange(range);
+    const out = {};
+    for (const uuid of this.resources.keys()) {
+      const live = this.history.get(uuid);
+      const latest = live?.[live.length - 1];
+      const snapshot = this.containers.get(uuid);
+      if (!latest || !snapshot || snapshot.running === 0) continue;
+
+      const samples = this._series("res", uuid, r);
+      out[uuid] = {
+        cpu: latest.cpu,
+        mem: latest.mem,
+        memPct: latest.memPct,
+        peakCpu: samples.reduce((m, p) => Math.max(m, p.cpu), 0),
+        peakMemPct: samples.reduce((m, p) => Math.max(m, p.memPct), 0),
+        series: this._downsample(samples, 40, ["cpu", "memPct"]).map((p) => ({
+          t: p.t,
+          cpu: p.cpu,
+          memPct: p.memPct,
+        })),
+      };
+    }
+    return out;
   }
 
   getEvents(limit = 100) {

@@ -10,7 +10,7 @@ import { formatBytes, formatDuration } from "../../utils/byteUtils";
 const barColor = (p) => (p >= 90 ? "#ef4444" : p >= 70 ? "#f59e0b" : "#34d399");
 
 const Metric = ({ icon: Icon, label, percent, detail, series }) => (
-  <div className="bg-slate-900/50 rounded-lg p-3 border border-white/10">
+  <div className="bg-slate-900 rounded-lg p-3 border border-slate-800">
     <div className="flex items-center justify-between mb-1">
       <div className="flex items-center gap-1.5">
         <Icon className="w-4 h-4 text-emerald-400" />

@@ -56,8 +56,8 @@ const ResourceCard = ({ resource }) => {
 
   return (
     <div
-      className={`border-b border-white/30 last:border-b-0 ${
-        isExpanded ? "bg-purple-500/5 border-l-4 border-l-purple-500" : ""
+      className={`border-b border-slate-800 last:border-b-0 ${
+        isExpanded ? "bg-blue-500/5 border-l-4 border-l-blue-500" : ""
       }`}
     >
       <div
@@ -87,7 +87,7 @@ const ResourceCard = ({ resource }) => {
       </div>
 
       {isExpanded && hasDetails && (
-        <div className="bg-slate-800/30 border-t border-white/10 px-3 md:px-8 py-4 md:py-6">
+        <div className="bg-slate-800/30 border-t border-slate-800 px-3 md:px-8 py-4 md:py-6">
           <ResourceDetails
             resource={resource}
             onShowYaml={() => setShowYaml(true)}

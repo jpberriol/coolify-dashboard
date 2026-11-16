@@ -4,9 +4,9 @@ import { SOUND_TYPES } from "../../utils/soundUtils";
 
 const VARIANTS = {
   primary:
-    "bg-purple-500/20 hover:bg-purple-500/30 active:bg-purple-500/40 text-purple-200 border-purple-500/40",
+    "bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white border-blue-500",
   secondary:
-    "bg-white/5 hover:bg-white/10 active:bg-white/20 text-slate-300 border-white/10",
+    "bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 border-slate-700",
   success:
     "bg-green-500/20 hover:bg-green-500/40 active:bg-green-500/50 text-green-200 border-green-500/40",
   warning:
@@ -15,7 +15,7 @@ const VARIANTS = {
     "bg-red-500/20 hover:bg-red-500/40 active:bg-red-500/50 text-red-200 border-red-500/40",
   info: "bg-blue-500/20 hover:bg-blue-500/40 active:bg-blue-500/50 text-blue-200 border-blue-500/40",
   indigo:
-    "bg-indigo-500/20 hover:bg-indigo-500/40 active:bg-indigo-500/50 text-indigo-200 border-indigo-500/40",
+    "bg-blue-500/20 hover:bg-blue-500/40 active:bg-blue-500/50 text-blue-200 border-blue-500/40",
 };
 
 const SIZES = {

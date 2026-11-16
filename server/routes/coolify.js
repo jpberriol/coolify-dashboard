@@ -10,16 +10,16 @@ import { getResourceStats } from "../services/DockerStatsService.js";
  * Coolify API Routes
  *
  * Refactored with SOLID principles:
- * - Single Responsibility: Routes sadece routing'den sorumlu
- * - Open/Closed: Yeni resource tipleri config ile eklenebilir
- * - DRY: Factory pattern ile 346 satır → 55 satır (~84% azalma)
- * - Dependency Inversion: CoolifyApiClient abstraksiyonu
+ * - Single Responsibility: routes only handle routing
+ * - Open/Closed: new resource types can be added via config
+ * - DRY: factory pattern: 346 lines → 55 lines (~84% less)
+ * - Dependency Inversion: CoolifyApiClient abstraction
  */
 
 const router = express.Router();
 
 // Mount resource routers using factory pattern
-// Her resource type için generic CRUD routes otomatik oluşturuluyor
+// Generic CRUD routes are generated automatically for each resource type
 router.use("/", createResourceRouter("applications", RESOURCE_CONFIGS.applications));
 router.use("/", createResourceRouter("services", RESOURCE_CONFIGS.services));
 router.use("/", createResourceRouter("databases", RESOURCE_CONFIGS.databases));

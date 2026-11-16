@@ -98,8 +98,8 @@ const ResourceCard = ({ resource }) => {
 
   return (
     <div
-      className={`border-b border-white/30 last:border-b-0 relative overflow-hidden transition-all duration-300 ${
-        isExpanded ? "bg-purple-500/5" : ""
+      className={`border-b border-slate-800 last:border-b-0 relative overflow-hidden transition-all duration-300 ${
+        isExpanded ? "bg-slate-900/80" : ""
       }`}
     >
       <div
@@ -128,6 +128,7 @@ const ResourceCard = ({ resource }) => {
                 createdAt={resource.created_at}
                 updatedAt={resource.updated_at}
                 healthBadge={<HealthBadge uuid={resource.uuid} />}
+                uuid={resource.uuid}
               />
             </div>
           </div>

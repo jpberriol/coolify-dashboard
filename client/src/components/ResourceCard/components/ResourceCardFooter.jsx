@@ -36,7 +36,7 @@ const ResourceCardFooter = ({
   };
 
   return (
-    <div className="border-t border-white/10 bg-slate-800/20 px-3 md:px-6 py-3 md:py-4">
+    <div className="border-t border-slate-800 bg-slate-800/20 px-3 md:px-6 py-3 md:py-4">
       <div className="flex flex-row flex-wrap items-center justify-between gap-3">
         {/* Left Side: Go to App & View YAML */}
         <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:pl-6">
@@ -44,7 +44,7 @@ const ResourceCardFooter = ({
           {urls.length > 0 && resourceTypeId !== "database" && (
             <button
               onClick={(e) => handleClick(e, () => onUrlClick(urls[0]))}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-200 hover:text-indigo-100 rounded-lg border border-indigo-500/40 transition text-sm font-medium cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 hover:text-blue-100 rounded-lg border border-blue-500/40 transition text-sm font-medium cursor-pointer"
             >
               <ArrowTopRightOnSquareIcon className="w-4 h-4" />
               <span className="hidden md:inline">{t("resourceCard.goToApp")}</span>
@@ -55,7 +55,7 @@ const ResourceCardFooter = ({
           {(resource.docker_compose || resource.docker_compose_raw) && (
             <button
               onClick={(e) => handleClick(e, onYamlClick)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-200 hover:text-indigo-100 rounded-lg border border-indigo-500/40 transition text-sm font-medium cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 hover:text-blue-100 rounded-lg border border-blue-500/40 transition text-sm font-medium cursor-pointer"
             >
               <DocumentTextIcon className="w-4 h-4" />
               <span className="hidden md:inline">{t("resourceCard.viewYaml")}</span>

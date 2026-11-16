@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { PlayIcon, StopIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 const useResourceActions = (currentAction) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const getActionColor = () => {
     if (!currentAction) return null;
@@ -43,8 +43,7 @@ const useResourceActions = (currentAction) => {
     }
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    const minuteUnit = i18n.language === "tr" ? "d" : "m";
-    return `${minutes}${minuteUnit} ${remainingSeconds}s`;
+    return `${minutes}m ${remainingSeconds}s`;
   };
 
   return {

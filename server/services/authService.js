@@ -5,7 +5,7 @@ class AuthService {
     if (!username || !password) {
       return {
         valid: false,
-        error: "Kullanıcı adı ve şifre zorunludur",
+        error: "Username and password are required",
       };
     }
 
@@ -15,7 +15,7 @@ class AuthService {
     ) {
       return {
         valid: false,
-        error: "Geçersiz kullanıcı adı veya şifre",
+        error: "Invalid username or password",
       };
     }
 
@@ -25,7 +25,7 @@ class AuthService {
   generateToken(username) {
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
-      throw new Error("JWT_SECRET yapılandırılmamış");
+      throw new Error("JWT_SECRET is not configured");
     }
 
     return jwt.sign({ username }, jwtSecret, {
@@ -35,18 +35,18 @@ class AuthService {
 
   verifyToken(token) {
     if (!token) {
-      throw new Error("Token zorunludur");
+      throw new Error("Token is required");
     }
 
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
-      throw new Error("JWT_SECRET yapılandırılmamış");
+      throw new Error("JWT_SECRET is not configured");
     }
 
     try {
       return jwt.verify(token, jwtSecret);
     } catch (_error) {
-      throw new Error("Geçersiz veya süresi dolmuş token");
+      throw new Error("Invalid or expired token");
     }
   }
 

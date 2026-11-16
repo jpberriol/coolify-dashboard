@@ -7,14 +7,27 @@ import { getCoolifyClient } from "../services/CoolifyApiClient.js";
  * ResourceRouterFactory - Generic CRUD routes factory for Coolify resources
  *
  * SOLID Principles:
- * - Single Responsibility: Sadece route oluşturmaktan sorumlu
+ * - Single Responsibility: only responsible for building routes
  * - Open/Closed: Yeni resource tipleri config ile eklenebilir
- * - DRY: Kod tekrarını önler (346 satır → ~100 satır)
+ * - DRY: avoids code repetition (346 lines → ~100 lines)
  *
  * @param {string} resourceType - Resource tipi (applications, services, databases)
  * @param {object} options - Route configuration options
  * @returns {express.Router} Configured express router
  */
+/**
+ * Database credentials are never sent to the browser: any field whose name
+ * contains "password" (postgres_password, redis_password, ...) is dropped.
+ */
+const stripDatabaseSecrets = (list) =>
+  Array.isArray(list)
+    ? list.map((db) =>
+        Object.fromEntries(
+          Object.entries(db).filter(([key]) => !/password/i.test(key))
+        )
+      )
+    : list;
+
 export const createResourceRouter = (resourceType, options = {}) => {
   const router = express.Router();
   const coolify = getCoolifyClient();
@@ -36,7 +49,7 @@ export const createResourceRouter = (resourceType, options = {}) => {
       async (req, res, next) => {
         try {
           const data = await coolify.get(`/${resourceType}`);
-          res.json(data);
+          res.json(resourceType === "databases" ? stripDatabaseSecrets(data) : data);
         } catch (error) {
           next(error);
         }
@@ -139,7 +152,7 @@ export const createResourceRouter = (resourceType, options = {}) => {
 
 /**
  * Resource configuration map
- * Bu configuration yeni resource tipleri eklemeyi kolaylaştırır (Open/Closed Principle)
+ * This configuration makes adding new resource types easy (Open/Closed Principle)
  */
 export const RESOURCE_CONFIGS = {
   applications: {

@@ -20,7 +20,7 @@ router.post(
     const user = authService.getUserInfo(username);
 
     res.json({
-      message: "Giriş başarılı",
+      message: "Login successful",
       token,
       user,
     });

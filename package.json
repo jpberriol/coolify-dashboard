@@ -4,11 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "description": "A modern, production-ready dashboard for monitoring Coolify apps, services, and databases.",
-  "author": "Burak Kalaycı",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kalayciburak/coolify-dashboard.git"
+    "url": "https://github.com/jpberriol/coolify-dashboard.git"
   },
   "workspaces": [
     "client",

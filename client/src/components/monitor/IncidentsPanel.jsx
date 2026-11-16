@@ -108,7 +108,7 @@ const IncidentsPanel = ({ incidents = [] }) => {
   const healthy = incidents.length === 0;
 
   return (
-    <div className="bg-slate-900/50 rounded-xl border border-white/10 p-3 md:p-4">
+    <div className="bg-slate-900 rounded-lg border border-slate-800 p-3 md:p-4">
       <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
         <div className="flex items-center gap-2">
           {healthy ? (
@@ -131,8 +131,8 @@ const IncidentsPanel = ({ incidents = [] }) => {
               onClick={() => setTab(id)}
               className={`px-3 py-1 rounded-md border cursor-pointer transition ${
                 tab === id
-                  ? "bg-purple-500/30 border-purple-500/50 text-white"
-                  : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                  ? "bg-blue-600 border-blue-500 text-white"
+                  : "bg-slate-950 border-slate-700 text-slate-300 hover:bg-slate-800"
               }`}
             >
               {t(`monitor.tab.${id}`)}

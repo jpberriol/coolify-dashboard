@@ -37,11 +37,11 @@ const BackToTop = () => {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-gradient-to-br from-indigo-500/70 to-purple-600/70 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-110 cursor-pointer group opacity-60 hover:opacity-100"
-      aria-label="Başa Dön"
-      title="Başa Dön"
+      className="fixed bottom-6 right-6 z-50 p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 shadow-lg border border-slate-700 transition-colors duration-200 cursor-pointer group opacity-70 hover:opacity-100"
+      aria-label="Back to top"
+      title="Back to top"
     >
-      <ChevronUpIcon className="h-5 w-5 text-white group-hover:animate-pulse" />
+      <ChevronUpIcon className="h-5 w-5 text-white " />
     </button>
   );
 };

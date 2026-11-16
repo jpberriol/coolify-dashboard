@@ -25,7 +25,7 @@ const highlightLog = (log) => {
     },
     {
       regex: /(https?:\/\/[^\s]+)/g,
-      className: "text-purple-400 font-semibold underline",
+      className: "text-blue-400 font-semibold underline",
     },
     {
       regex: /\b(ERROR|FATAL|CRITICAL)\b/gi,
@@ -58,7 +58,7 @@ const highlightLog = (log) => {
     },
     {
       regex: /([/\\][\w\-./\\]+\.\w+)/g,
-      className: "text-indigo-400 font-mono",
+      className: "text-blue-400 font-mono",
     },
     {
       regex: /\b(\d+(?:\.\d+)?(?:ms|s|MB|GB|KB|%)?)\b/g,
@@ -201,10 +201,10 @@ const LogsModal = ({ name, type, uuid, onClose }) => {
       onClick={handleClose}
     >
       <div
-        className="bg-[#1e1a3c] rounded-xl border border-[#4e3976]/30 max-w-6xl w-full max-h-[80vh] flex flex-col"
+        className="bg-[#1e1a3c] rounded-xl border border-[#334155]/30 max-w-6xl w-full max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-[#4e3976]/30">
+        <div className="flex items-center justify-between p-4 border-b border-[#334155]/30">
           <div className="flex items-center gap-3">
             <h3 className="text-lg font-semibold text-white">
               {t("admin.logsTitle", { name })}
@@ -230,14 +230,14 @@ const LogsModal = ({ name, type, uuid, onClose }) => {
           </button>
         </div>
 
-        <div className="p-4 border-b border-[#4e3976]/30 flex items-center gap-4">
+        <div className="p-4 border-b border-[#334155]/30 flex items-center gap-4">
           <div className="flex-1">
             <input
               type="text"
               placeholder={t("admin.filterLogs")}
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-[#100e21] border border-[#4e3976]/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 transition"
+              className="w-full px-3 py-2 bg-[#020617] border border-[#334155]/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
             />
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -245,7 +245,7 @@ const LogsModal = ({ name, type, uuid, onClose }) => {
               type="checkbox"
               checked={autoScroll}
               onChange={(e) => setAutoScroll(e.target.checked)}
-              className="w-4 h-4 accent-purple-500"
+              className="w-4 h-4 accent-blue-500"
             />
             <span className="text-sm text-slate-300">
               {t("admin.autoScroll")}
@@ -253,13 +253,13 @@ const LogsModal = ({ name, type, uuid, onClose }) => {
           </label>
         </div>
 
-        <div className="flex-1 overflow-auto p-4 bg-[#100e21] font-mono text-sm">
+        <div className="flex-1 overflow-auto p-4 bg-[#020617] font-mono text-sm">
           {hasError ? (
             <div className="text-center py-8 space-y-4">
               <p className="text-red-400">{t("admin.logsUnavailable")}</p>
               <button
                 onClick={handleRetry}
-                className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg text-purple-300 hover:text-purple-200 transition text-sm cursor-pointer"
+                className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 hover:text-blue-200 transition text-sm cursor-pointer"
               >
                 {t("admin.retryConnection")}
               </button>
@@ -288,7 +288,7 @@ const LogsModal = ({ name, type, uuid, onClose }) => {
           )}
         </div>
 
-        <div className="p-3 border-t border-[#4e3976]/30 text-xs text-slate-400 text-center">
+        <div className="p-3 border-t border-[#334155]/30 text-xs text-slate-400 text-center">
           {filter
             ? t("admin.logsFiltered", { count: filteredLogs.length })
             : t("admin.logsTotal", { count: filteredLogs.length })}

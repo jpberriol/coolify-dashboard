@@ -11,12 +11,33 @@ const clampInt = (value, fallback, min, max) => {
   return Math.min(Math.max(n, min), max);
 };
 
-// Host metrics + active incidents + per-resource health badges.
+const MAX_RANGE_MS = 72 * 3600000;
+
+/**
+ * Range from the query string: either `minutes` (relative, ends now) or an
+ * absolute `from`/`to` pair in epoch milliseconds. Capped to 72 h, which is
+ * what the collector retains.
+ */
+const parseRange = (query) => {
+  const now = Date.now();
+  const from = Number(query.from);
+  const to = Number(query.to);
+
+  if (Number.isFinite(from) && Number.isFinite(to) && to > from) {
+    const end = Math.min(to, now);
+    return { from: Math.max(from, end - MAX_RANGE_MS), to: end };
+  }
+  const minutes = clampInt(query.minutes, 30, 1, MAX_RANGE_MS / 60000);
+  return { from: now - minutes * 60000, to: now };
+};
+
+// Host metrics + usage per resource + active incidents + health badges.
 router.get("/overview", verifyToken, (req, res) => {
-  const minutes = clampInt(req.query.minutes, 60, 5, 120);
+  const range = parseRange(req.query);
   res.json({
     status: monitor.getStatus(),
-    host: monitor.getHost(minutes),
+    host: monitor.getHost(range),
+    usage: monitor.getUsageSummary(range),
     incidents: monitor.getActiveIncidents(),
     health: monitor.getHealthSummary(),
   });
@@ -29,8 +50,7 @@ router.get("/events", verifyToken, (req, res) => {
 
 // History + health + SSL + container detail for a single resource.
 router.get("/resource/:uuid", verifyToken, (req, res) => {
-  const minutes = clampInt(req.query.minutes, 60, 5, 120);
-  res.json(monitor.getResourceDetail(req.params.uuid, minutes));
+  res.json(monitor.getResourceDetail(req.params.uuid, parseRange(req.query)));
 });
 
 // Latest deployments of an application (Coolify API), without build logs.

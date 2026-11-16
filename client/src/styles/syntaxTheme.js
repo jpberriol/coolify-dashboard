@@ -37,7 +37,7 @@ export const customSyntaxTheme = {
     padding: "1em",
     margin: "0",
     overflow: "auto",
-    background: "#100e21",
+    background: "#020617",
   },
   comment: {
     color: "#8b7db8",

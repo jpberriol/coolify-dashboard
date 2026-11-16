@@ -1,10 +1,7 @@
-import i18n from "../i18n";
-
 export const formatDate = (dateString) => {
   if (!dateString) return null;
   const date = new Date(dateString);
-  const language = i18n.language === "tr" ? "tr-TR" : "en-US";
-  return date.toLocaleDateString(language, {
+  return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -30,20 +27,9 @@ export const getTimeAgo = (dateString) => {
   for (const [name, secondsInInterval] of Object.entries(intervals)) {
     const interval = Math.floor(seconds / secondsInInterval);
     if (interval >= 1) {
-      if (i18n.language === "tr") {
-        const turkishNames = {
-          year: "yıl",
-          month: "ay",
-          day: "gün",
-          hour: "saat",
-          minute: "dakika",
-        };
-        return `${interval} ${turkishNames[name]} önce`;
-      } else {
-        const suffix = interval === 1 ? "" : "s";
-        return `${interval} ${name}${suffix} ago`;
-      }
+      const suffix = interval === 1 ? "" : "s";
+      return `${interval} ${name}${suffix} ago`;
     }
   }
-  return i18n.language === "tr" ? "az önce" : "just now";
+  return "just now";
 };

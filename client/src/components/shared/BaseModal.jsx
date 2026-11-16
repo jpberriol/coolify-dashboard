@@ -30,19 +30,19 @@ const BaseModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? "modal-title" : undefined}
     >
       <div
-        className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-2xl border border-white/10 w-full ${maxWidth} max-h-[90vh] overflow-auto`}
+        className={`bg-slate-900 rounded-xl shadow-2xl border border-slate-800 w-full ${maxWidth} max-h-[90vh] overflow-auto`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 bg-slate-900/95 backdrop-blur-sm z-10">
+          <div className="flex items-center justify-between p-6 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
             {title && (
               <h2
                 id="modal-title"

@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useRangeParams } from "../store/rangeStore";
 import {
   fetchOverview,
   fetchEvents,
@@ -8,13 +9,16 @@ import {
 
 // Overview is shared by the host panel, the incidents panel and every
 // resource badge: one request every 10s, deduplicated by react-query.
-export const useOverview = () =>
-  useQuery({
-    queryKey: ["monitor-overview"],
-    queryFn: fetchOverview,
+export const useOverview = () => {
+  const params = useRangeParams();
+  return useQuery({
+    queryKey: ["monitor-overview", params],
+    queryFn: () => fetchOverview(params),
     refetchInterval: 10000,
     staleTime: 5000,
+    placeholderData: keepPreviousData,
   });
+};
 
 export const useEvents = (enabled) =>
   useQuery({
@@ -25,14 +29,17 @@ export const useEvents = (enabled) =>
     enabled,
   });
 
-export const useResourceDetail = (uuid) =>
-  useQuery({
-    queryKey: ["monitor-resource", uuid],
-    queryFn: () => fetchResourceDetail(uuid),
+export const useResourceDetail = (uuid) => {
+  const params = useRangeParams();
+  return useQuery({
+    queryKey: ["monitor-resource", uuid, params],
+    queryFn: () => fetchResourceDetail(uuid, params),
     refetchInterval: 10000,
     staleTime: 5000,
     enabled: Boolean(uuid),
+    placeholderData: keepPreviousData,
   });
+};
 
 export const useDeployments = (uuid, enabled = true) =>
   useQuery({

@@ -18,7 +18,7 @@ const PrivateRoute = ({ children }) => {
 
 const LoadingSpinner = () => (
   <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
   </div>
 );
 
@@ -64,7 +64,7 @@ const App = () => {
               },
               success: {
                 style: {
-                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  background: "#059669",
                   color: "#ffffff",
                 },
                 iconTheme: {
@@ -74,7 +74,7 @@ const App = () => {
               },
               error: {
                 style: {
-                  background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                  background: "#dc2626",
                   color: "#ffffff",
                 },
                 iconTheme: {
@@ -84,12 +84,12 @@ const App = () => {
               },
               loading: {
                 style: {
-                  background: "linear-gradient(135deg, #a855f7 0%, #9333ea 100%)",
+                  background: "#2563eb",
                   color: "#ffffff",
                 },
                 iconTheme: {
                   primary: "#ffffff",
-                  secondary: "#a855f7",
+                  secondary: "#2563eb",
                 },
               },
             }}

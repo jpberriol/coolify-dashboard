@@ -5,6 +5,7 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { formatDate, getTimeAgo } from "../../utils/dateUtils";
+import UsageCell from "../monitor/UsageCell";
 
 const ResourceHeader = ({
   name,
@@ -18,6 +19,7 @@ const ResourceHeader = ({
   createdAt,
   updatedAt,
   healthBadge,
+  uuid,
 }) => {
   return (
     <>
@@ -65,8 +67,14 @@ const ResourceHeader = ({
               {healthBadge}
             </div>
 
+            {uuid && (
+              <div className="mb-2 max-w-xs">
+                <UsageCell uuid={uuid} />
+              </div>
+            )}
+
             {tag && (
-              <span className="hidden lg:inline-block mt-2 text-xs px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">
+              <span className="hidden lg:inline-block mt-2 text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded border border-blue-500/30">
                 {tag}
               </span>
             )}
@@ -74,7 +82,7 @@ const ResourceHeader = ({
         </div>
       </div>
 
-      <div className="hidden lg:grid grid-cols-11 gap-4 items-center">
+      <div className="hidden lg:grid grid-cols-12 gap-4 items-center">
         <div className="col-span-1 flex justify-center">
           {hasDetails ? (
             <div className="w-4 h-4 flex items-center justify-center">
@@ -146,14 +154,18 @@ const ResourceHeader = ({
           )}
         </div>
 
-        <div className="col-span-3 flex justify-center">
+        <div className="col-span-2 flex items-center">
+          {uuid && <UsageCell uuid={uuid} />}
+        </div>
+
+        <div className="col-span-2 flex justify-center">
           <div className="flex flex-col gap-1.5 items-center">
             <div className="flex items-center gap-2">
               <ResourceTypeIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
               <span className="text-slate-300 text-sm">{type}</span>
             </div>
             {tag && (
-              <span className="inline-block min-w-32 truncate text-xs px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30 text-center">
+              <span className="inline-block min-w-32 truncate text-xs px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded border border-blue-500/30 text-center">
                 {tag}
               </span>
             )}

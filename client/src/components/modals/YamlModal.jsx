@@ -34,10 +34,10 @@ const YamlModal = ({ name, content, onClose }) => {
       onClick={handleClose}
     >
       <div
-        className="bg-[#1e1a3c] rounded-xl border border-[#4e3976]/30 max-w-4xl w-full max-h-[80vh] flex flex-col"
+        className="bg-[#1e1a3c] rounded-xl border border-[#334155]/30 max-w-4xl w-full max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-[#4e3976]/30">
+        <div className="flex items-center justify-between p-4 border-b border-[#334155]/30">
           <h3 className="text-lg font-semibold text-white">
             Docker Compose - {name}
           </h3>
@@ -55,7 +55,7 @@ const YamlModal = ({ name, content, onClose }) => {
             showLineNumbers={true}
             customStyle={{
               borderRadius: "0.5rem",
-              backgroundColor: "#100e21",
+              backgroundColor: "#020617",
               border: "none",
               margin: 0,
             }}

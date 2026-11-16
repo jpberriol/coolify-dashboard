@@ -44,7 +44,7 @@ const ResourceFilters = ({
             placeholder={t("common.search")}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition text-sm"
+            className="w-full pl-9 md:pl-10 pr-3 md:pr-4 py-1.5 bg-slate-900 border border-slate-800 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm"
           />
         </div>
       </div>
@@ -74,7 +74,7 @@ const ResourceFilters = ({
         {/* Sort Order Toggle */}
         <button
           onClick={handleSortOrderToggle}
-          className="flex items-center px-3 md:px-4 py-2 md:py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm hover:bg-white/10 active:bg-white/20 transition cursor-pointer touch-manipulation"
+          className="flex items-center px-3 md:px-4 py-2 md:py-1.5 bg-slate-900 border border-slate-800 rounded-md text-white text-sm hover:bg-white/10 active:bg-white/20 transition cursor-pointer touch-manipulation"
           title={
             sortOrder === "asc"
               ? t("sortOptions.ascending")

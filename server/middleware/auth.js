@@ -7,14 +7,14 @@ export const verifyToken = (req, res, next) => {
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-      throw new AppError("Token bulunamadı", 401);
+      throw new AppError("Token not found", 401);
     }
 
     req.user = authService.verifyToken(token);
     next();
   } catch (error) {
     return res.status(error.statusCode || 401).json({
-      message: error.message || "Geçersiz token",
+      message: error.message || "Invalid token",
     });
   }
 };
@@ -29,7 +29,7 @@ export const verifyTokenForSSE = (req, res, next) => {
 
     if (!token) {
       return res.status(401).json({
-        message: "Token bulunamadı",
+        message: "Token not found",
       });
     }
 
@@ -38,7 +38,7 @@ export const verifyTokenForSSE = (req, res, next) => {
     next();
   } catch (error) {
     return res.status(error.statusCode || 401).json({
-      message: error.message || "Geçersiz token",
+      message: error.message || "Invalid token",
     });
   }
 };

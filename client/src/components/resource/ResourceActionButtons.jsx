@@ -58,7 +58,7 @@ const ResourceActionButtons = ({ resource }) => {
   };
 
   const buttonClass =
-    "flex items-center gap-2 px-4 py-2.5 backdrop-blur-sm transition-all duration-200 rounded-lg border disabled:opacity-40 disabled:cursor-not-allowed font-medium text-sm cursor-pointer";
+    "flex items-center gap-2 px-4 py-2.5 transition-all duration-200 rounded-lg border disabled:opacity-40 disabled:cursor-not-allowed font-medium text-sm cursor-pointer";
 
   return (
     <>
@@ -66,7 +66,7 @@ const ResourceActionButtons = ({ resource }) => {
         <button
           onClick={() => setConfirmAction("start")}
           disabled={isRunning || isTransitioning || currentAction}
-          className={`${buttonClass} bg-green-500/20 hover:bg-green-500/30 border-green-500/40 hover:border-green-500/60 text-green-300 hover:text-green-100 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] disabled:hover:bg-green-500/20 disabled:hover:shadow-none`}
+          className={`${buttonClass} bg-green-500/20 hover:bg-green-500/30 border-green-500/40 hover:border-green-500/60 text-green-300 hover:text-green-100 disabled:hover:bg-green-500/20`}
         >
           {currentAction?.action === "starting" ? (
             <div className="w-4 h-4 border-2 border-green-300 border-t-transparent rounded-full animate-spin" />
@@ -83,7 +83,7 @@ const ResourceActionButtons = ({ resource }) => {
         <button
           onClick={() => setConfirmAction("stop")}
           disabled={isStopped || isTransitioning || currentAction}
-          className={`${buttonClass} bg-yellow-500/20 hover:bg-yellow-500/30 border-yellow-500/40 hover:border-yellow-500/60 text-yellow-300 hover:text-yellow-100 hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] disabled:hover:bg-yellow-500/20 disabled:hover:shadow-none`}
+          className={`${buttonClass} bg-yellow-500/20 hover:bg-yellow-500/30 border-yellow-500/40 hover:border-yellow-500/60 text-yellow-300 hover:text-yellow-100 disabled:hover:bg-yellow-500/20`}
         >
           {currentAction?.action === "stopping" ? (
             <div className="w-4 h-4 border-2 border-yellow-300 border-t-transparent rounded-full animate-spin" />
@@ -101,7 +101,7 @@ const ResourceActionButtons = ({ resource }) => {
           <button
             onClick={() => setShowLogs(true)}
             disabled={isStopped || isTransitioning}
-            className={`${buttonClass} bg-cyan-500/20 hover:bg-cyan-500/30 border-cyan-500/40 hover:border-cyan-500/60 text-cyan-300 hover:text-cyan-100 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] disabled:hover:bg-cyan-500/20 disabled:hover:shadow-none`}
+            className={`${buttonClass} bg-cyan-500/20 hover:bg-cyan-500/30 border-cyan-500/40 hover:border-cyan-500/60 text-cyan-300 hover:text-cyan-100 disabled:hover:bg-cyan-500/20`}
           >
             <DocumentMagnifyingGlassIcon className="w-4 h-4" />
             <span className="hidden md:inline">{t("admin.viewLogs")}</span>
@@ -111,7 +111,7 @@ const ResourceActionButtons = ({ resource }) => {
         <button
           onClick={() => setConfirmAction("delete")}
           disabled={isTransitioning || currentAction}
-          className={`${buttonClass} bg-red-500/20 hover:bg-red-500/30 border-red-500/40 hover:border-red-500/60 text-red-300 hover:text-red-100 hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] disabled:hover:bg-red-500/20 disabled:hover:shadow-none`}
+          className={`${buttonClass} bg-red-500/20 hover:bg-red-500/30 border-red-500/40 hover:border-red-500/60 text-red-300 hover:text-red-100 disabled:hover:bg-red-500/20`}
         >
           {currentAction?.action === "deleting" ? (
             <div className="w-4 h-4 border-2 border-red-300 border-t-transparent rounded-full animate-spin" />

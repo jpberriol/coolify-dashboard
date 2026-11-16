@@ -11,7 +11,7 @@ const ComponentsList = ({ applications, databases }) => {
   }
 
   return (
-    <div className="bg-slate-900/50 rounded-lg p-5 border border-white/10">
+    <div className="bg-slate-900 rounded-lg p-5 border border-slate-800">
       <div className="flex items-center gap-2 mb-4">
         <ServerIcon className="w-5 h-5 text-green-400" />
         <span className="text-sm font-semibold text-white">

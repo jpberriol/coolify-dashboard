@@ -17,7 +17,7 @@ const ResourceDeployments = ({ resourceUuid }) => {
   const { data, isLoading, isError } = useDeployments(resourceUuid);
 
   return (
-    <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+    <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
       <div className="flex items-center gap-2 mb-3">
         <RocketLaunchIcon className="w-5 h-5 text-orange-400" />
         <span className="text-sm font-semibold text-white">
@@ -37,7 +37,7 @@ const ResourceDeployments = ({ resourceUuid }) => {
           {data.map((d) => (
             <li
               key={d.uuid}
-              className="flex items-center gap-3 bg-slate-800/50 rounded px-3 py-2 text-xs"
+              className="flex items-center gap-3 bg-slate-800/60 rounded px-3 py-2 text-xs"
             >
               <span
                 className={`px-2 py-0.5 rounded border font-mono whitespace-nowrap ${

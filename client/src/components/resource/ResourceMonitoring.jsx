@@ -7,10 +7,10 @@ import {
 } from "@heroicons/react/24/outline";
 import { useResourceDetail } from "../../hooks/useMonitor";
 import Sparkline from "../shared/Sparkline";
-import { formatBytes, formatRate } from "../../utils/byteUtils";
+import { formatBytes, formatRate, formatDuration } from "../../utils/byteUtils";
 
 const Card = ({ icon: Icon, title, color = "text-emerald-400", children }) => (
-  <div className="bg-slate-900/50 rounded-lg p-4 border border-white/10">
+  <div className="bg-slate-900 rounded-lg p-4 border border-slate-800">
     <div className="flex items-center gap-2 mb-3">
       <Icon className={`w-5 h-5 ${color}`} />
       <span className="text-sm font-semibold text-white">{title}</span>
@@ -20,7 +20,7 @@ const Card = ({ icon: Icon, title, color = "text-emerald-400", children }) => (
 );
 
 const Chart = ({ label, value, data, max, color }) => (
-  <div className="bg-slate-800/50 rounded-lg p-3">
+  <div className="bg-slate-800/60 rounded-lg p-3">
     <div className="flex items-center justify-between mb-1">
       <span className="text-xs font-semibold text-white">{label}</span>
       <span className="text-xs font-mono text-slate-300">{value}</span>
@@ -89,7 +89,7 @@ const ResourceMonitoring = ({ resourceUuid }) => {
           )}
 
           {ssl.length > 0 && (
-            <Card icon={ShieldCheckIcon} title="SSL" color="text-indigo-400">
+            <Card icon={ShieldCheckIcon} title="SSL" color="text-blue-400">
               <ul className="space-y-1 text-xs font-mono">
                 {ssl.map((c) => (
                   <li key={c.host} className="truncate">
@@ -113,7 +113,7 @@ const ResourceMonitoring = ({ resourceUuid }) => {
             <Card
               icon={ArrowPathIcon}
               title={t("monitor.containers")}
-              color="text-pink-400"
+              color="text-sky-400"
             >
               <div className="space-y-1 text-xs font-mono text-slate-300">
                 <p>
@@ -145,7 +145,7 @@ const ResourceMonitoring = ({ resourceUuid }) => {
         <Card
           icon={CpuChipIcon}
           title={t("monitor.history", {
-            minutes: Math.round((history.length * data.intervalSec) / 60) || 1,
+            span: formatDuration((data.range.to - data.range.from) / 1000),
           })}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

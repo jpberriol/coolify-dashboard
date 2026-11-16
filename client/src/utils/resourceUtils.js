@@ -41,22 +41,6 @@ export const getResourceTag = (resource) => {
   return null;
 };
 
-export const getDatabasePassword = (resource) => {
-  const passwordFields = [
-    "dragonfly_password",
-    "postgres_password",
-    "mysql_root_password",
-    "mariadb_root_password",
-    "redis_password",
-    "mongodb_root_password",
-  ];
-
-  for (const field of passwordFields) {
-    if (resource[field]) return resource[field];
-  }
-  return null;
-};
-
 export const hasResourceDetails = (resource) => {
   const {
     description,
