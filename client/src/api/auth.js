@@ -20,12 +20,9 @@ authApi.interceptors.request.use((config) => {
 authApi.interceptors.response.use(
   (response) => response,
   (error) => {
-    const is2FARequest =
-      error.config?.url?.includes("/verify-2fa") ||
-      error.config?.url?.includes("/login") ||
-      error.config?.url?.includes("/2fa/setup");
+    const isLoginRequest = error.config?.url?.includes("/login");
 
-    if (error.response?.status === 401 && !is2FARequest) {
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.location.href = "/login";
@@ -36,15 +33,6 @@ authApi.interceptors.response.use(
 
 export const login = async (username, password) => {
   const response = await authApi.post("/login", { username, password });
-  return response.data;
-};
-
-export const verify2FA = async (username, password, twoFactorCode) => {
-  const response = await authApi.post("/verify-2fa", {
-    username,
-    password,
-    twoFactorCode,
-  });
   return response.data;
 };
 

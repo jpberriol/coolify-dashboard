@@ -2,6 +2,8 @@ import ResourceDetails from "../../resource/ResourceDetails";
 import DatabaseInfo from "../../resource/DatabaseInfo";
 import ComponentsList from "../../resource/ComponentsList";
 import ResourceStats from "../../resource/ResourceStats";
+import ResourceMonitoring from "../../resource/ResourceMonitoring";
+import ResourceDeployments from "../../resource/ResourceDeployments";
 import { RESOURCE_TYPES } from "../../../constants/resourceTypes";
 
 const ResourceCardBody = ({ resource }) => {
@@ -14,6 +16,18 @@ const ResourceCardBody = ({ resource }) => {
       <div className="mt-4">
         <ResourceStats resourceUuid={resource.uuid} />
       </div>
+
+      {/* History, availability, SSL, restarts */}
+      <div className="mt-4">
+        <ResourceMonitoring resourceUuid={resource.uuid} />
+      </div>
+
+      {/* Recent deployments (applications only) */}
+      {resource.type === RESOURCE_TYPES.APPLICATION && (
+        <div className="mt-4">
+          <ResourceDeployments resourceUuid={resource.uuid} />
+        </div>
+      )}
 
       {/* Database-specific information */}
       {resource.type === RESOURCE_TYPES.DATABASE && (

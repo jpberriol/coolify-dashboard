@@ -26,18 +26,9 @@
     "logoutSuccess": "See you later! Come back soon",
     "username": "Username",
     "password": "Password",
-    "credentialsVerified": "Credentials verified! Please enter 2FA code",
     "loginSuccess": "Login successful! Welcome back",
     "loginError": "Login failed",
-    "invalidCredentials": "Invalid username or password",
-    "twoFactorCode": "Two-Factor Authentication Code",
-    "twoFactorPlaceholder": "Enter 6-digit code",
-    "twoFactorRequired": "Two-factor authentication required",
-    "invalidTwoFactorCode": "Invalid authentication code",
-    "tooManyAttempts": "Too many failed attempts. Redirecting to login...",
-    "verify": "Verify",
-    "verifying": "Verifying...",
-    "twoFactorInfo": "Enter the 6-digit code from your authenticator app"
+    "invalidCredentials": "Invalid username or password"
   },
   "dashboard": {
     "title": "Coolify Dashboard",
@@ -234,5 +225,52 @@
     "serviceStopFailed": "Failed to stop service",
     "serviceDeleted": "Service deleted successfully",
     "serviceDeleteFailed": "Failed to delete service"
+  },
+  "monitor": {
+    "host": "Host",
+    "uptime": "uptime",
+    "load": "load",
+    "disk": "Disk",
+    "unavailable": "unavailable",
+    "allGood": "All systems operational",
+    "activeIncidents": "{{count}} active incident(s)",
+    "noIncidents": "No active incidents.",
+    "noEvents": "No events recorded yet.",
+    "tab": {
+      "active": "Active",
+      "timeline": "Timeline"
+    },
+    "msg": {
+      "status": "Status: {{status}}",
+      "statusChange": "Status changed: {{from}} → {{to}}",
+      "down": "Not responding at {{url}} ({{reason}})",
+      "recovered": "Back online at {{url}} ({{ms}} ms)",
+      "restart": "Container restarted (total {{count}}) {{container}}",
+      "oom": "Killed by out-of-memory {{container}}",
+      "sslExpiring": "SSL certificate for {{host}} expires in {{days}} day(s)",
+      "sslExpired": "SSL certificate for {{host}} has expired",
+      "hostDisk": "Host disk at {{percent}}%",
+      "hostMemory": "Host memory at {{percent}}%",
+      "highCpu": "High CPU usage ({{percent}}%)",
+      "highMemory": "High memory usage ({{percent}}%)"
+    },
+    "availability": "Availability",
+    "up": "Up",
+    "down": "Down",
+    "latency": "Latency",
+    "uptimeRatio": "Recent uptime",
+    "sslDays": "{{days}} days left",
+    "sslExpiredShort": "expired",
+    "containers": "Containers",
+    "running": "Running",
+    "restarts": "Restarts",
+    "oomKilled": "OOM killed",
+    "dockerHealth": "Docker health",
+    "history": "Last ~{{minutes}} min",
+    "network": "Network",
+    "diskIo": "Disk I/O",
+    "deployments": "Recent Deployments",
+    "noDeployments": "No deployments found",
+    "forceRebuild": "Force rebuild"
   }
 }

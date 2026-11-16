@@ -5,6 +5,8 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import coolifyRoutes from "./routes/coolify.js";
 import configRoutes from "./routes/config.js";
+import monitorRoutes from "./routes/monitor.js";
+import monitor from "./services/MonitorService.js";
 import { corsMiddleware } from "./middleware/cors.js";
 import { handleError } from "./utils/errorHandler.js";
 
@@ -23,6 +25,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/coolify", coolifyRoutes);
 app.use("/api/config", configRoutes);
+app.use("/api/monitor", monitorRoutes);
 
 app.get("/healthz", (req, res) => {
   res.json({
@@ -45,6 +48,11 @@ app.use((err, req, res, _next) => {
 });
 
 app.listen(PORT, () => {
+  try {
+    monitor.start();
+  } catch (error) {
+    console.warn("Monitor could not start:", error.message);
+  }
   if (NODE_ENV !== "production") {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log(`Environment: ${NODE_ENV}`);

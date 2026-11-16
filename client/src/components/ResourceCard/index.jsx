@@ -13,6 +13,7 @@ import {
 } from "../../utils/resourceUtils";
 import { RESOURCE_TYPES } from "../../constants/resourceTypes";
 import ResourceHeader from "../resource/ResourceHeader";
+import HealthBadge from "../monitor/HealthBadge";
 import ResourceCardBody from "./components/ResourceCardBody";
 import ResourceCardFooter from "./components/ResourceCardFooter";
 import useResourceCardState from "./hooks/useResourceCardState";
@@ -126,6 +127,7 @@ const ResourceCard = ({ resource }) => {
                 onUrlClick={setConfirmUrl}
                 createdAt={resource.created_at}
                 updatedAt={resource.updated_at}
+                healthBadge={<HealthBadge uuid={resource.uuid} />}
               />
             </div>
           </div>

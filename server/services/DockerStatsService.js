@@ -1,6 +1,6 @@
 import Docker from "dockerode";
 
-const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+export const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 
 /**
  * Coolify's own REST API never exposes a resource's internal numeric id
@@ -15,7 +15,7 @@ const docker = new Docker({ socketPath: "/var/run/docker.sock" });
  * belongs to the same resource, e.g. Keycloak + its Postgres). That's a
  * more reliable match than the coolify.* labels.
  */
-const PROJECT_LABEL = "com.docker.compose.project";
+export const PROJECT_LABEL = "com.docker.compose.project";
 
 const calcCpuPercent = (stats) => {
   const cpuDelta =
@@ -33,13 +33,37 @@ const calcCpuPercent = (stats) => {
   return 0;
 };
 
-const readContainerStats = async (containerInfo) => {
+const sumNetwork = (networks = {}) =>
+  Object.values(networks).reduce(
+    (acc, n) => ({
+      rx: acc.rx + (n.rx_bytes || 0),
+      tx: acc.tx + (n.tx_bytes || 0),
+    }),
+    { rx: 0, tx: 0 }
+  );
+
+const sumBlockIo = (blkio = {}) => {
+  const entries = blkio.io_service_bytes_recursive || [];
+  return entries.reduce(
+    (acc, e) => {
+      const op = String(e.op || "").toLowerCase();
+      if (op === "read") acc.read += e.value || 0;
+      else if (op === "write") acc.write += e.value || 0;
+      return acc;
+    },
+    { read: 0, write: 0 }
+  );
+};
+
+export const readContainerStats = async (containerInfo) => {
   const container = docker.getContainer(containerInfo.Id);
   const stats = await container.stats({ stream: false });
 
   const cacheBytes = stats.memory_stats.stats?.cache || 0;
   const memUsageBytes = (stats.memory_stats.usage || 0) - cacheBytes;
   const memLimitBytes = stats.memory_stats.limit || 0;
+  const net = sumNetwork(stats.networks);
+  const blk = sumBlockIo(stats.blkio_stats);
 
   return {
     containerId: containerInfo.Id.slice(0, 12),
@@ -50,6 +74,11 @@ const readContainerStats = async (containerInfo) => {
     memPercent: memLimitBytes
       ? Number(((memUsageBytes / memLimitBytes) * 100).toFixed(1))
       : 0,
+    // Cumulative counters since container start; callers derive rates.
+    netRxBytes: net.rx,
+    netTxBytes: net.tx,
+    blkReadBytes: blk.read,
+    blkWriteBytes: blk.write,
   };
 };
 

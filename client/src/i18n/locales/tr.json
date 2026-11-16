@@ -26,18 +26,9 @@
     "logoutSuccess": "Görüşmek üzere! Tekrar bekleriz",
     "username": "Kullanıcı Adı",
     "password": "Şifre",
-    "credentialsVerified": "Kimlik doğrulandı! Lütfen 2FA kodunu girin",
     "loginSuccess": "Giriş başarılı! Hoş geldiniz",
     "loginError": "Giriş başarısız",
-    "invalidCredentials": "Geçersiz kullanıcı adı veya şifre",
-    "twoFactorCode": "İki Faktörlü Doğrulama Kodu",
-    "twoFactorPlaceholder": "6 haneli kodu girin",
-    "twoFactorRequired": "İki faktörlü doğrulama gerekli",
-    "invalidTwoFactorCode": "Geçersiz doğrulama kodu",
-    "tooManyAttempts": "Çok fazla başarısız deneme. Giriş ekranına yönlendiriliyorsunuz...",
-    "verify": "Doğrula",
-    "verifying": "Doğrulanıyor...",
-    "twoFactorInfo": "Kimlik doğrulama uygulamanızdaki 6 haneli kodu girin"
+    "invalidCredentials": "Geçersiz kullanıcı adı veya şifre"
   },
   "dashboard": {
     "title": "Coolify Dashboard",
@@ -234,5 +225,52 @@
     "serviceStopFailed": "Servis durdurulamadı",
     "serviceDeleted": "Servis başarıyla silindi",
     "serviceDeleteFailed": "Servis silinemedi"
+  },
+  "monitor": {
+    "host": "Sunucu",
+    "uptime": "çalışma süresi",
+    "load": "yük",
+    "disk": "Disk",
+    "unavailable": "kullanılamıyor",
+    "allGood": "Tüm sistemler çalışıyor",
+    "activeIncidents": "{{count}} aktif olay",
+    "noIncidents": "Aktif olay yok.",
+    "noEvents": "Henüz kayıtlı olay yok.",
+    "tab": {
+      "active": "Aktif",
+      "timeline": "Zaman çizelgesi"
+    },
+    "msg": {
+      "status": "Durum: {{status}}",
+      "statusChange": "Durum değişti: {{from}} → {{to}}",
+      "down": "{{url}} yanıt vermiyor ({{reason}})",
+      "recovered": "{{url}} tekrar çevrimiçi ({{ms}} ms)",
+      "restart": "Konteyner yeniden başladı (toplam {{count}}) {{container}}",
+      "oom": "Bellek yetersizliğinden sonlandırıldı {{container}}",
+      "sslExpiring": "{{host}} SSL sertifikası {{days}} gün içinde bitiyor",
+      "sslExpired": "{{host}} SSL sertifikasının süresi doldu",
+      "hostDisk": "Sunucu diski %{{percent}} dolu",
+      "hostMemory": "Sunucu belleği %{{percent}} dolu",
+      "highCpu": "Yüksek CPU kullanımı (%{{percent}})",
+      "highMemory": "Yüksek bellek kullanımı (%{{percent}})"
+    },
+    "availability": "Erişilebilirlik",
+    "up": "Çalışıyor",
+    "down": "Kapalı",
+    "latency": "Gecikme",
+    "uptimeRatio": "Son uptime",
+    "sslDays": "{{days}} gün kaldı",
+    "sslExpiredShort": "süresi doldu",
+    "containers": "Konteynerler",
+    "running": "Çalışan",
+    "restarts": "Yeniden başlatma",
+    "oomKilled": "OOM ile sonlandırıldı",
+    "dockerHealth": "Docker sağlığı",
+    "history": "Son ~{{minutes}} dk",
+    "network": "Ağ",
+    "diskIo": "Disk G/Ç",
+    "deployments": "Son Deploymentlar",
+    "noDeployments": "Deployment bulunamadı",
+    "forceRebuild": "Zorla yeniden derleme"
   }
 }

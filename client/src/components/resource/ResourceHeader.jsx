@@ -17,6 +17,7 @@ const ResourceHeader = ({
   TypeIcon: ResourceTypeIcon, // eslint-disable-line no-unused-vars
   createdAt,
   updatedAt,
+  healthBadge,
 }) => {
   return (
     <>
@@ -61,6 +62,7 @@ const ResourceHeader = ({
                   </p>
                 )}
               </div>
+              {healthBadge}
             </div>
 
             {tag && (
@@ -102,6 +104,7 @@ const ResourceHeader = ({
             <span className="text-white font-medium truncate block text-sm w-full text-center">
               {name}
             </span>
+            {healthBadge}
             {sourceInfo && (
               <span className="text-xs text-slate-400 truncate flex items-center gap-1">
                 <span>{sourceInfo.icon}</span>

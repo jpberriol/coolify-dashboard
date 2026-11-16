@@ -6,6 +6,7 @@ import LanguageSelector from "../../components/LanguageSelector";
 import ResourceTabs from "./components/ResourceTabs";
 import ResourceFilters from "./components/ResourceFilters";
 import ResourceList from "./components/ResourceList";
+import MonitorPanel from "../../components/monitor/MonitorPanel";
 import useDashboardState from "./hooks/useDashboardState";
 import { useSoundEffects } from "../../hooks/useSoundEffects";
 import { SOUND_TYPES } from "../../utils/soundUtils";
@@ -116,6 +117,8 @@ const Dashboard = () => {
             </button>
           </div>
         )}
+
+        <MonitorPanel />
 
         {/* Controls Section */}
         <div className="mb-4 md:mb-6">

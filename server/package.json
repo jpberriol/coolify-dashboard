@@ -8,8 +8,7 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "build": "echo 'Server build completed - no build step needed'",
-    "lint": "echo 'Server linting configured in .eslintrc.json'",
-    "generate-2fa": "node scripts/generate-2fa-secret.js"
+    "lint": "echo 'Server linting configured in .eslintrc.json'"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -20,8 +19,6 @@
     "dockerode": "^4.0.2",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "jsonwebtoken": "^9.0.2",
-    "qrcode": "^1.5.4",
-    "speakeasy": "^2.0.0"
+    "jsonwebtoken": "^9.0.2"
   }
 }
