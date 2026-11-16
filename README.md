@@ -146,7 +146,7 @@ DASHBOARD_USER_TYPE=admin
 - **Secure Authentication**: JWT-based authentication with secure token management
 - **Monitoring** (server-side collector, no extra setup):
   - Host CPU / RAM / disk with history
-  - Per-resource history charts: CPU, memory, network and disk I/O (last ~2h, in memory)
+  - Per-resource history charts: CPU, memory, network and disk I/O, with selectable ranges (5m, 30m, 3h, 24h or custom). History is kept for 90 days (`MONITOR_RETENTION_DAYS`) and persisted in `DATA_DIR` (default `server/data`; mount a volume at `/app/server/data`)
   - Container restarts, OOM kills and Docker health
   - Public URL health checks (status code, latency, uptime) and SSL expiry
   - Recent deployments per application (from the Coolify API)

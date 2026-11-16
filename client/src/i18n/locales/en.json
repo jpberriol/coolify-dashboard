@@ -62,10 +62,6 @@
     "components": "Components",
     "description": "Description",
     "viewYaml": "View YAML",
-    "internalConnectionAddress": "Internal Connection Address",
-    "externalConnectionAddress": "External Connection Address",
-    "external": "External",
-    "internal": "Internal",
     "notConfigured": "Not Configured",
     "warning": "WARNING",
     "publicAccess": "Public Access",
@@ -109,8 +105,6 @@
     "continue": "Continue"
   },
   "tooltips": {
-    "internalConnection": "You can use this address in your other services to connect to this database.",
-    "externalConnection": "You can use this address to connect to this database from outside your infrastructure.",
     "backupWarning": "It is recommended to configure backup to prevent data loss."
   },
   "status": {
@@ -225,8 +219,8 @@
       "to": "To",
       "apply": "Apply",
       "invalid": "Choose a valid range (end after start).",
-      "tooLong": "Range cannot exceed {{hours}} hours.",
-      "hint": "History is kept for {{hours}} hours."
+      "tooLong": "Range cannot exceed {{days}} days.",
+      "hint": "History is kept for {{days}} days; older data is averaged into coarser points."
     }
   }
 }

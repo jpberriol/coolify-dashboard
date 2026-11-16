@@ -44,8 +44,6 @@ const App = () => {
               </Routes>
             </Suspense>
             <Tooltip id="backup-tooltip" />
-            <Tooltip id="internal-url-tooltip" />
-            <Tooltip id="external-url-tooltip" />
             <Toaster
             position="top-right"
             reverseOrder={false}

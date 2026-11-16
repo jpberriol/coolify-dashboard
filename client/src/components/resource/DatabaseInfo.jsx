@@ -1,182 +1,18 @@
-import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  LockClosedIcon,
   ShieldCheckIcon,
   ArchiveBoxIcon,
   GlobeAltIcon,
   CpuChipIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  ClipboardDocumentIcon,
-  CheckIcon,
   CheckCircleIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
-  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
-import { copyToClipboard } from "../../utils/clipboardUtils";
-
-// Never render the credential part of a connection string (user:password@).
-const maskCredentials = (url) =>
-  String(url).replace(/(:\/\/[^:/@\s]*:)[^@/\s]*@/, "$1••••••@");
 
 const DatabaseInfo = ({ resource }) => {
   const { t } = useTranslation();
-  const [showInternalUrl, setShowInternalUrl] = useState(false);
-  const [showExternalUrl, setShowExternalUrl] = useState(false);
-  const [copiedField, setCopiedField] = useState(null);
-
-  const handleCopy = async (text, fieldName) => {
-    const success = await copyToClipboard(text);
-    if (success) {
-      setCopiedField(fieldName);
-      setTimeout(() => setCopiedField(null), 2000);
-    }
-  };
-
-  useEffect(() => {
-    if (showInternalUrl) {
-      const timer = setTimeout(() => {
-        setShowInternalUrl(false);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [showInternalUrl]);
-
-  useEffect(() => {
-    if (showExternalUrl) {
-      const timer = setTimeout(() => {
-        setShowExternalUrl(false);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [showExternalUrl]);
-
   return (
     <div className="space-y-4">
-      {resource.internal_db_url && (
-        <div className="bg-slate-900 rounded-lg p-4 border border-blue-500/30">
-          <div className="flex items-center justify-between mb-3">
-            <div
-              className="flex items-center gap-2 cursor-help"
-              data-tooltip-id="internal-url-tooltip"
-              data-tooltip-content={t("tooltips.internalConnection")}
-            >
-              <LockClosedIcon className="w-5 h-5 text-blue-400" />
-              <span className="text-sm font-semibold text-white">
-                {t("resourceCard.internalConnectionAddress")}
-              </span>
-            </div>
-            <span
-              className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded border border-blue-500/30 cursor-help"
-              data-tooltip-id="internal-url-tooltip"
-              data-tooltip-content={t("tooltips.internalConnection")}
-            >
-              {t("resourceCard.internal")}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between gap-4 bg-slate-800/50 px-3 py-2 rounded">
-            <span className="flex-1 text-sm text-slate-300 font-mono break-all">
-              {showInternalUrl
-                ? maskCredentials(resource.internal_db_url)
-                : "•••••••••••••••••••"}
-            </span>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowInternalUrl(!showInternalUrl);
-                }}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition cursor-pointer"
-              >
-                {showInternalUrl ? (
-                  <EyeSlashIcon className="w-4 h-4" />
-                ) : (
-                  <EyeIcon className="w-4 h-4" />
-                )}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopy(resource.internal_db_url, "internal_url");
-                }}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition cursor-pointer"
-              >
-                {copiedField === "internal_url" ? (
-                  <CheckIcon className="w-4 h-4 text-green-400" />
-                ) : (
-                  <ClipboardDocumentIcon className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {resource.external_db_url && (
-        <div className="bg-slate-900 rounded-lg p-4 border border-cyan-500/30">
-          <div className="flex items-center justify-between mb-3">
-            <div
-              className="flex items-center gap-2 cursor-help"
-              data-tooltip-id="external-url-tooltip"
-              data-tooltip-content={t("tooltips.externalConnection")}
-            >
-              <ArrowTopRightOnSquareIcon className="w-5 h-5 text-cyan-400" />
-              <span className="text-sm font-semibold text-white">
-                {t("resourceCard.externalConnectionAddress")}
-              </span>
-            </div>
-            <span
-              className="text-xs px-2 py-0.5 bg-cyan-500/20 text-cyan-300 rounded border border-cyan-500/30 cursor-help"
-              data-tooltip-id="external-url-tooltip"
-              data-tooltip-content={t("tooltips.externalConnection")}
-            >
-              {t("resourceCard.external")}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between gap-4 bg-slate-800/50 px-3 py-2 rounded">
-            <span className="flex-1 text-sm text-slate-300 font-mono break-all">
-              {showExternalUrl
-                ? maskCredentials(resource.external_db_url)
-                : "•••••••••••••••••••"}
-            </span>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowExternalUrl(!showExternalUrl);
-                }}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition cursor-pointer"
-              >
-                {showExternalUrl ? (
-                  <EyeSlashIcon className="w-4 h-4" />
-                ) : (
-                  <EyeIcon className="w-4 h-4" />
-                )}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopy(resource.external_db_url, "external_url");
-                }}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition cursor-pointer"
-              >
-                {copiedField === "external_url" ? (
-                  <CheckIcon className="w-4 h-4 text-green-400" />
-                ) : (
-                  <ClipboardDocumentIcon className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div
           className={`bg-slate-900 rounded-lg p-4 border ${

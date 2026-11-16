@@ -74,7 +74,7 @@ export const mapDatabase = (db) => ({
   ...db,
   type: RESOURCE_TYPES.DATABASE,
   name: db.name,
-  fqdns: db.external_db_url ? [db.external_db_url] : [],
+  fqdns: [],
   status: db.status,
   database_type: db.database_type,
 });

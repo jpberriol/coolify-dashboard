@@ -23,12 +23,18 @@ const RESOURCES_INTERVAL_MS = num("MONITOR_RESOURCES_INTERVAL_MS", 30000);
 const HEALTH_INTERVAL_MS = num("MONITOR_HEALTH_INTERVAL_MS", 30000);
 const SSL_INTERVAL_MS = 60 * 60 * 1000;
 const HISTORY_POINTS = num("MONITOR_HISTORY_POINTS", 1080); // 3h @ 10s
-const RETENTION_HOURS = num("MONITOR_RETENTION_HOURS", 72);
-const MINUTE_POINTS = RETENTION_HOURS * 60; // 1-minute averages
-const HISTORY_SAVE_MS = 5 * 60 * 1000;
+// Long-term history is kept in coarser tiers so memory/disk stay bounded:
+//   raw 10 s (3 h)  ->  1 min (3 days)  ->  15 min (RETENTION_DAYS, default 90)
+export const RETENTION_DAYS = num("MONITOR_RETENTION_DAYS", 90);
+const RETENTION_MS = RETENTION_DAYS * 86400000;
+const TIERS = [
+  { name: "minute", ms: 60000, points: 3 * 24 * 60 },
+  { name: "quarter", ms: 15 * 60000, points: RETENTION_DAYS * 96 },
+];
+const HISTORY_SAVE_MS = 10 * 60 * 1000;
 const HOST_KEY = "__host__";
 const HEALTH_HISTORY = 120;
-const MAX_EVENTS = 500;
+const MAX_EVENTS = 2000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../data");
 const EVENTS_FILE = path.join(DATA_DIR, "monitor-events.json");
 const HISTORY_FILE = path.join(DATA_DIR, "monitor-history.json");
@@ -77,8 +83,9 @@ class MonitorService {
     this.ssl = new Map(); // host -> result
     this.sslAlerted = new Map(); // host -> 'warn'|'crit'
 
-    this.minute = new Map(); // key -> 1-minute averaged points (long range)
-    this.acc = new Map(); // key -> accumulator for the minute in progress
+    // tier name -> Map(key -> averaged points); acc holds the bucket in progress
+    this.tiers = Object.fromEntries(TIERS.map((t) => [t.name, new Map()]));
+    this.acc = new Map();
     this._loadHistory();
 
     this.events = this._loadEvents();
@@ -118,15 +125,9 @@ class MonitorService {
     const saver = setInterval(() => this._saveHistory(), HISTORY_SAVE_MS);
     saver.unref?.();
     this.timers.push(saver);
-    const flush = () => this._saveHistory();
-    process.once("SIGTERM", () => {
-      flush();
-      process.exit(0);
-    });
-    process.once("SIGINT", () => {
-      flush();
-      process.exit(0);
-    });
+    const shutdown = () => this._saveHistory().finally(() => process.exit(0));
+    process.once("SIGTERM", shutdown);
+    process.once("SIGINT", shutdown);
   }
 
   stop() {
@@ -141,7 +142,10 @@ class MonitorService {
     try {
       if (fs.existsSync(EVENTS_FILE)) {
         const parsed = JSON.parse(fs.readFileSync(EVENTS_FILE, "utf8"));
-        if (Array.isArray(parsed)) return parsed.slice(0, MAX_EVENTS);
+        if (Array.isArray(parsed)) {
+          const since = Date.now() - RETENTION_MS;
+          return parsed.filter((e) => e.ts >= since).slice(0, MAX_EVENTS);
+        }
       }
     } catch (error) {
       console.warn("[monitor] could not load events:", error.message);
@@ -414,63 +418,76 @@ class MonitorService {
     this._rollup(key, sample);
   }
 
-  /** Averages raw samples into 1-minute points kept for RETENTION_HOURS. */
+  /** Averages raw samples into the coarser long-term tiers. */
   _rollup(key, sample) {
-    const minute = Math.floor(sample.t / 60000) * 60000;
-    let acc = this.acc.get(key);
+    for (const tier of TIERS) {
+      const bucket = Math.floor(sample.t / tier.ms) * tier.ms;
+      const accKey = `${tier.name}:${key}`;
+      let acc = this.acc.get(accKey);
 
-    if (acc && acc.minute !== minute) {
-      const point = { t: acc.minute };
-      for (const [k, total] of Object.entries(acc.sum)) {
-        point[k] = Math.round((total / acc.n) * 10) / 10;
+      if (acc && acc.bucket !== bucket) {
+        const point = { t: acc.bucket };
+        for (const [k, total] of Object.entries(acc.sum)) {
+          point[k] = Math.round((total / acc.n) * 10) / 10;
+        }
+        const store = this.tiers[tier.name];
+        let arr = store.get(key);
+        if (!arr) {
+          arr = [];
+          store.set(key, arr);
+        }
+        arr.push(point);
+        if (arr.length > tier.points) arr.splice(0, arr.length - tier.points);
+        acc = null;
       }
-      let arr = this.minute.get(key);
-      if (!arr) {
-        arr = [];
-        this.minute.set(key, arr);
-      }
-      arr.push(point);
-      if (arr.length > MINUTE_POINTS) arr.splice(0, arr.length - MINUTE_POINTS);
-      acc = null;
-    }
 
-    if (!acc) {
-      acc = { minute, n: 0, sum: {} };
-      this.acc.set(key, acc);
-    }
-    acc.n += 1;
-    for (const [k, v] of Object.entries(sample)) {
-      if (k !== "t") acc.sum[k] = (acc.sum[k] || 0) + v;
+      if (!acc) {
+        acc = { bucket, n: 0, sum: {} };
+        this.acc.set(accKey, acc);
+      }
+      acc.n += 1;
+      for (const [k, v] of Object.entries(sample)) {
+        if (k !== "t") acc.sum[k] = (acc.sum[k] || 0) + v;
+      }
     }
   }
 
+  // History file format: rows are arrays to keep a 90-day file small.
   _loadHistory() {
     try {
       if (!fs.existsSync(HISTORY_FILE)) return;
       const parsed = JSON.parse(fs.readFileSync(HISTORY_FILE, "utf8"));
-      const since = Date.now() - RETENTION_HOURS * 3600000;
-      for (const [key, points] of Object.entries(parsed.minute || {})) {
-        const fresh = points.filter((p) => p.t >= since);
-        if (fresh.length) this.minute.set(key, fresh.slice(-MINUTE_POINTS));
+      const since = Date.now() - RETENTION_MS;
+      for (const tier of TIERS) {
+        for (const [key, series] of Object.entries(parsed.tiers?.[tier.name] || {})) {
+          const points = series.rows
+            .filter((row) => row[0] >= since)
+            .map((row) => Object.fromEntries(series.keys.map((k, i) => [k, row[i]])));
+          if (points.length) this.tiers[tier.name].set(key, points.slice(-tier.points));
+        }
       }
     } catch (error) {
       console.warn("[monitor] could not load history:", error.message);
     }
   }
 
-  _saveHistory() {
+  async _saveHistory() {
     try {
       const out = {};
-      for (const [key, points] of this.minute) {
-        // Drop history of resources that no longer exist.
-        if (key !== HOST_KEY && this.resourcesLoaded && !this.resources.has(key)) continue;
-        out[key] = points;
+      for (const tier of TIERS) {
+        out[tier.name] = {};
+        for (const [key, points] of this.tiers[tier.name]) {
+          // Drop history of resources that no longer exist.
+          if (key !== HOST_KEY && this.resourcesLoaded && !this.resources.has(key)) continue;
+          if (!points.length) continue;
+          const keys = Object.keys(points[0]);
+          out[tier.name][key] = { keys, rows: points.map((p) => keys.map((k) => p[k])) };
+        }
       }
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-      fs.writeFileSync(
-        HISTORY_FILE,
-        JSON.stringify({ savedAt: Date.now(), minute: out })
-      );
+      await fs.promises.mkdir(DATA_DIR, { recursive: true });
+      const tmp = `${HISTORY_FILE}.tmp`;
+      await fs.promises.writeFile(tmp, JSON.stringify({ savedAt: Date.now(), tiers: out }));
+      await fs.promises.rename(tmp, HISTORY_FILE);
     } catch (error) {
       console.warn("[monitor] could not persist history:", error.message);
     }
@@ -669,17 +686,26 @@ class MonitorService {
   }
 
   /**
-   * Samples of `key` inside [from, to]. Uses the raw 10 s series when it
-   * reaches back far enough, otherwise the 1-minute series.
+   * Samples of `key` inside [from, to], from the finest tier that reaches
+   * back to `from` (raw 10 s, then 1 min, then 15 min). If none does, the
+   * tier with the longest history is used.
    */
-  _series(rawMap, key, range) {
-    const raw = (rawMap === "host" ? this.hostHistory : this.history.get(key)) || [];
-    const inRange = (arr) => arr.filter((p) => p.t >= range.from && p.t <= range.to);
-    if (raw.length && raw[0].t <= range.from) return inRange(raw);
+  _series(kind, key, range) {
+    const raw = (kind === "host" ? this.hostHistory : this.history.get(key)) || [];
+    const candidates = [
+      { points: raw, ms: 10000 },
+      ...TIERS.map((t) => ({ points: this.tiers[t.name].get(key) || [], ms: t.ms })),
+    ].filter((c) => c.points.length);
 
-    const minute = this.minute.get(key) || [];
-    if (minute.length) return inRange(minute);
-    return inRange(raw);
+    const covering = candidates.find((c) => c.points[0].t <= range.from + c.ms);
+    const best =
+      covering ||
+      candidates.reduce(
+        (a, c) => (!a || c.points[0].t < a.points[0].t ? c : a),
+        null
+      );
+    if (!best) return [];
+    return best.points.filter((p) => p.t >= range.from && p.t <= range.to);
   }
 
   _normalizeRange(range) {
@@ -912,6 +938,7 @@ class MonitorService {
       dockerAvailable: this.dockerOk,
       resourcesLoaded: this.resourcesLoaded,
       running: this.running,
+      retentionDays: RETENTION_DAYS,
     };
   }
 }

@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middleware/auth.js";
-import monitor from "../services/MonitorService.js";
+import monitor, { RETENTION_DAYS } from "../services/MonitorService.js";
 import { getCoolifyClient } from "../services/CoolifyApiClient.js";
 
 const router = express.Router();
@@ -11,12 +11,12 @@ const clampInt = (value, fallback, min, max) => {
   return Math.min(Math.max(n, min), max);
 };
 
-const MAX_RANGE_MS = 72 * 3600000;
+const MAX_RANGE_MS = RETENTION_DAYS * 86400000;
 
 /**
  * Range from the query string: either `minutes` (relative, ends now) or an
- * absolute `from`/`to` pair in epoch milliseconds. Capped to 72 h, which is
- * what the collector retains.
+ * absolute `from`/`to` pair in epoch milliseconds. Capped to the retention
+ * window (MONITOR_RETENTION_DAYS, default 90 days).
  */
 const parseRange = (query) => {
   const now = Date.now();

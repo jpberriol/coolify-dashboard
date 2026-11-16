@@ -16,14 +16,15 @@ import { getCoolifyClient } from "../services/CoolifyApiClient.js";
  * @returns {express.Router} Configured express router
  */
 /**
- * Database credentials are never sent to the browser: any field whose name
- * contains "password" (postgres_password, redis_password, ...) is dropped.
+ * Database credentials are never sent to the browser: passwords
+ * (postgres_password, redis_password, ...) and connection strings
+ * (internal_db_url, external_db_url, which embed the password) are dropped.
  */
 const stripDatabaseSecrets = (list) =>
   Array.isArray(list)
     ? list.map((db) =>
         Object.fromEntries(
-          Object.entries(db).filter(([key]) => !/password/i.test(key))
+          Object.entries(db).filter(([key]) => !/password|_db_url$/i.test(key))
         )
       )
     : list;

@@ -7,8 +7,8 @@ export const RANGE_PRESETS = [
   { id: "24h", minutes: 1440 },
 ];
 
-// The server keeps 72 h of history.
-export const MAX_RANGE_HOURS = 72;
+// The server keeps 90 days of history (it also reports it in /overview).
+export const MAX_RANGE_DAYS = 90;
 
 /**
  * Time range shared by every monitoring widget (host, list rows, details).

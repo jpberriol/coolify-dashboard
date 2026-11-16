@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import useRangeStore, {
   RANGE_PRESETS,
-  MAX_RANGE_HOURS,
+  MAX_RANGE_DAYS,
 } from "../../store/rangeStore";
 
 const toLocalInput = (ms) => {
@@ -57,8 +57,8 @@ const RangePicker = () => {
       setError(t("monitor.range.invalid"));
       return;
     }
-    if (e - f > MAX_RANGE_HOURS * 3600000) {
-      setError(t("monitor.range.tooLong", { hours: MAX_RANGE_HOURS }));
+    if (e - f > MAX_RANGE_DAYS * 86400000) {
+      setError(t("monitor.range.tooLong", { days: MAX_RANGE_DAYS }));
       return;
     }
     setCustom(f, e);
@@ -114,7 +114,7 @@ const RangePicker = () => {
           />
           {error && <p className="mb-2 text-xs text-red-400">{error}</p>}
           <p className="mb-2 text-xs text-slate-500">
-            {t("monitor.range.hint", { hours: MAX_RANGE_HOURS })}
+            {t("monitor.range.hint", { days: MAX_RANGE_DAYS })}
           </p>
           <button
             onClick={apply}
