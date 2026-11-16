@@ -75,11 +75,23 @@ class CoolifyApiClient {
    * @private
    */
   _handleError(error, method, endpoint) {
-    const message =
-      error.response?.data?.message ||
-      `Failed to ${method} ${endpoint}`;
-    const status = error.response?.status || 500;
-    throw new AppError(message, status);
+    const status = error.response?.status;
+    let message = error.response?.data?.message;
+
+    if (!message) {
+      if (!error.response) {
+        // No HTTP response at all: DNS, refused connection, TLS or timeout.
+        message = `Cannot reach Coolify at ${this.baseURL} (${error.code || error.message}) while calling ${method} ${endpoint}`;
+      } else {
+        message = `Coolify answered ${status} to ${method} ${endpoint}`;
+      }
+    }
+
+    console.error(
+      `[coolify] ${method} ${endpoint} failed:`,
+      status || error.code || error.message
+    );
+    throw new AppError(message, status || 502);
   }
 }
 
