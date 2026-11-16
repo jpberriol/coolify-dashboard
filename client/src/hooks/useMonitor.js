@@ -20,14 +20,17 @@ export const useOverview = () => {
   });
 };
 
-export const useEvents = (enabled) =>
-  useQuery({
-    queryKey: ["monitor-events"],
-    queryFn: () => fetchEvents(100),
+export const useEvents = (enabled) => {
+  const params = useRangeParams();
+  return useQuery({
+    queryKey: ["monitor-events", params],
+    queryFn: () => fetchEvents(params),
+    placeholderData: keepPreviousData,
     refetchInterval: 15000,
     staleTime: 5000,
     enabled,
   });
+};
 
 export const useResourceDetail = (uuid) => {
   const params = useRangeParams();

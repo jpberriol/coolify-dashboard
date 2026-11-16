@@ -6,7 +6,7 @@ import {
   CpuChipIcon,
 } from "@heroicons/react/24/outline";
 import { useResourceDetail } from "../../hooks/useMonitor";
-import Sparkline from "../shared/Sparkline";
+import TimeChart from "../shared/TimeChart";
 import { formatBytes, formatRate, formatDuration } from "../../utils/byteUtils";
 
 const Card = ({ icon: Icon, title, color = "text-emerald-400", children }) => (
@@ -19,13 +19,21 @@ const Card = ({ icon: Icon, title, color = "text-emerald-400", children }) => (
   </div>
 );
 
-const Chart = ({ label, value, data, max, color }) => (
+const Chart = ({ label, value, data, range, max, color, format, empty }) => (
   <div className="bg-slate-800/60 rounded-lg p-3">
     <div className="flex items-center justify-between mb-1">
       <span className="text-xs font-semibold text-white">{label}</span>
       <span className="text-xs font-mono text-slate-300">{value}</span>
     </div>
-    <Sparkline data={data} max={max} color={color} />
+    <TimeChart
+      data={data}
+      from={range.from}
+      to={range.to}
+      max={max}
+      color={color}
+      format={format}
+      emptyText={empty}
+    />
   </div>
 );
 
@@ -43,8 +51,10 @@ const ResourceMonitoring = ({ resourceUuid }) => {
 
   const { history, container, health, ssl } = data;
   const last = history[history.length - 1];
-  const series = (key) => history.map((s) => s[key]);
-  const hasHistory = history.length >= 2;
+  const series = (key) => history.map((s) => ({ t: s.t, v: s[key] }));
+  const sumSeries = (a, b) => history.map((s) => ({ t: s.t, v: s[a] + s[b] }));
+  const empty = t("monitor.noData");
+  const hasHistory = history.length >= 1;
   const containers = container?.containers || [];
   const restarts = container?.restarts ?? 0;
   const oom = container?.oomKilled;
@@ -141,7 +151,7 @@ const ResourceMonitoring = ({ resourceUuid }) => {
         </div>
       )}
 
-      {hasHistory && (
+      {(hasHistory || container) && (
         <Card
           icon={CpuChipIcon}
           title={t("monitor.history", {
@@ -151,27 +161,47 @@ const ResourceMonitoring = ({ resourceUuid }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Chart
               label="CPU"
-              value={`${last.cpu}%`}
+              value={last ? `${last.cpu}%` : "-"}
               data={series("cpu")}
+              range={data.range}
+              empty={empty}
               color="#34d399"
+              format={(v) => `${v}%`}
             />
             <Chart
               label={t("resourceCard.memoryUsage")}
-              value={`${formatBytes(last.mem)} (${last.memPct}%)`}
+              value={last ? `${formatBytes(last.mem)} (${last.memPct}%)` : "-"}
               data={series("mem")}
+              range={data.range}
+              empty={empty}
               color="#60a5fa"
+              format={formatBytes}
             />
             <Chart
               label={t("monitor.network")}
-              value={`↓ ${formatRate(last.rx)}  ↑ ${formatRate(last.tx)}`}
-              data={history.map((s) => s.rx + s.tx)}
+              value={
+                last
+                  ? `↓ ${formatRate(last.rx)}  ↑ ${formatRate(last.tx)}`
+                  : "-"
+              }
+              data={sumSeries("rx", "tx")}
+              range={data.range}
+              empty={empty}
               color="#a78bfa"
+              format={formatRate}
             />
             <Chart
               label={t("monitor.diskIo")}
-              value={`R ${formatRate(last.br)}  W ${formatRate(last.bw)}`}
-              data={history.map((s) => s.br + s.bw)}
+              value={
+                last
+                  ? `R ${formatRate(last.br)}  W ${formatRate(last.bw)}`
+                  : "-"
+              }
+              data={sumSeries("br", "bw")}
+              range={data.range}
+              empty={empty}
               color="#f59e0b"
+              format={formatRate}
             />
           </div>
         </Card>

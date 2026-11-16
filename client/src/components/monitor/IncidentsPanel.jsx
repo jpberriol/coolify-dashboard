@@ -158,7 +158,9 @@ const IncidentsPanel = ({ incidents = [] }) => {
             <p className="text-xs text-slate-400">{t("common.loading")}</p>
           )}
           {!isLoading && events.length === 0 && (
-            <p className="text-xs text-slate-400">{t("monitor.noEvents")}</p>
+            <p className="text-xs text-slate-400">
+              {t("monitor.noEventsInRange")}
+            </p>
           )}
           <ul className="space-y-2 max-h-72 overflow-y-auto">
             {events.map((e) => (

@@ -220,6 +220,11 @@
       "invalid": "Choose a valid range (end after start).",
       "tooLong": "Range cannot exceed {{days}} days.",
       "hint": "History is kept for {{days}} days; older data is averaged into coarser points."
-    }
+    },
+    "noData": "No data for this period",
+    "noEventsInRange": "No events in the selected period. Choose a longer range to see older events.",
+    "storageNotMounted": "History is stored in {{dir}}, which is not a mounted volume. It will be lost on every redeploy. Add a volume mount on that path.",
+    "storageError": "History cannot be saved: {{error}}",
+    "dockerMissing": "Docker socket not available: live usage, charts and host metrics are empty. Mount /var/run/docker.sock."
   }
 }

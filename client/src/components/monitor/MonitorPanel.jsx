@@ -17,6 +17,21 @@ const MonitorPanel = () => {
         </h2>
         <RangePicker />
       </div>
+      {(data.status?.storage?.mounted === false ||
+        data.status?.storage?.error) && (
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+          {data.status.storage.error
+            ? t("monitor.storageError", { error: data.status.storage.error })
+            : t("monitor.storageNotMounted", {
+                dir: data.status.storage.dir,
+              })}
+        </div>
+      )}
+      {data.status?.dockerAvailable === false && (
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+          {t("monitor.dockerMissing")}
+        </div>
+      )}
       <IncidentsPanel incidents={data.incidents} />
       <HostPanel host={data.host} />
     </section>

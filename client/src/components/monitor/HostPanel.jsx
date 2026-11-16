@@ -4,12 +4,12 @@ import {
   CircleStackIcon,
   ServerStackIcon,
 } from "@heroicons/react/24/outline";
-import Sparkline from "../shared/Sparkline";
+import TimeChart from "../shared/TimeChart";
 import { formatBytes, formatDuration } from "../../utils/byteUtils";
 
 const barColor = (p) => (p >= 90 ? "#ef4444" : p >= 70 ? "#f59e0b" : "#34d399");
 
-const Metric = ({ icon: Icon, label, percent, detail, series }) => (
+const Metric = ({ icon: Icon, label, percent, detail, data, range, empty }) => (
   <div className="bg-slate-900 rounded-lg p-3 border border-slate-800">
     <div className="flex items-center justify-between mb-1">
       <div className="flex items-center gap-1.5">
@@ -20,7 +20,15 @@ const Metric = ({ icon: Icon, label, percent, detail, series }) => (
         {percent == null ? "-" : `${percent}%`}
       </span>
     </div>
-    <Sparkline data={series} max={100} color={barColor(percent ?? 0)} />
+    <TimeChart
+      data={data}
+      from={range.from}
+      to={range.to}
+      max={100}
+      color={barColor(percent ?? 0)}
+      format={(v) => `${v}%`}
+      emptyText={empty}
+    />
     {detail && (
       <p className="mt-1 text-xs text-slate-400 font-mono truncate">{detail}</p>
     )}
@@ -32,7 +40,10 @@ const HostPanel = ({ host }) => {
   const current = host?.current;
   if (!current) return null;
 
-  const series = (key) => (host.history || []).map((s) => s[key]);
+  const series = (key) =>
+    (host.history || []).map((s) => ({ t: s.t, v: s[key] }));
+  const range = host.range;
+  const empty = t("monitor.noData");
 
   return (
     <div>
@@ -56,14 +67,18 @@ const HostPanel = ({ host }) => {
           label="CPU"
           percent={current.cpuPercent}
           detail={`${current.cpuCount} cores`}
-          series={series("cpu")}
+          data={series("cpu")}
+          range={range}
+          empty={empty}
         />
         <Metric
           icon={CircleStackIcon}
           label={t("resourceCard.memoryUsage")}
           percent={current.memPercent}
           detail={`${formatBytes(current.memUsedBytes)} / ${formatBytes(current.memTotalBytes)}`}
-          series={series("mem")}
+          data={series("mem")}
+          range={range}
+          empty={empty}
         />
         <Metric
           icon={ServerStackIcon}
@@ -74,7 +89,9 @@ const HostPanel = ({ host }) => {
               ? `${formatBytes(current.disk.usedBytes)} / ${formatBytes(current.disk.totalBytes)}`
               : t("monitor.unavailable")
           }
-          series={series("disk")}
+          data={series("disk")}
+          range={range}
+          empty={empty}
         />
       </div>
     </div>

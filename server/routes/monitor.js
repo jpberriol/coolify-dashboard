@@ -45,7 +45,15 @@ router.get("/overview", verifyToken, (req, res) => {
 
 // Incident timeline (state changes, downtime, restarts, OOM, SSL, disk).
 router.get("/events", verifyToken, (req, res) => {
-  res.json(monitor.getEvents(clampInt(req.query.limit, 100, 1, 500)));
+  const hasRange = req.query.from || req.query.to || req.query.minutes;
+  const range = hasRange ? parseRange(req.query) : {};
+  res.json(
+    monitor.getEvents({
+      limit: clampInt(req.query.limit, 100, 1, 1000),
+      from: range.from,
+      to: range.to,
+    })
+  );
 });
 
 // History + health + SSL + container detail for a single resource.

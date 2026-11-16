@@ -86,7 +86,9 @@ class MonitorService {
     // tier name -> Map(key -> averaged points); acc holds the bucket in progress
     this.tiers = Object.fromEntries(TIERS.map((t) => [t.name, new Map()]));
     this.acc = new Map();
+    this.storage = { dir: DATA_DIR, mounted: null, lastSavedAt: null, error: null, restoredPoints: 0 };
     this._loadHistory();
+    this._checkMount();
 
     this.events = this._loadEvents();
     this.diskAlerted = null;
@@ -125,6 +127,10 @@ class MonitorService {
     const saver = setInterval(() => this._saveHistory(), HISTORY_SAVE_MS);
     saver.unref?.();
     this.timers.push(saver);
+    // First save soon after boot so storage problems show up quickly.
+    const first = setTimeout(() => this._saveHistory(), 30000);
+    first.unref?.();
+    this.timers.push(first);
     const shutdown = () => this._saveHistory().finally(() => process.exit(0));
     process.once("SIGTERM", shutdown);
     process.once("SIGINT", shutdown);
@@ -463,11 +469,29 @@ class MonitorService {
           const points = series.rows
             .filter((row) => row[0] >= since)
             .map((row) => Object.fromEntries(series.keys.map((k, i) => [k, row[i]])));
-          if (points.length) this.tiers[tier.name].set(key, points.slice(-tier.points));
+          if (points.length) {
+            this.tiers[tier.name].set(key, points.slice(-tier.points));
+            this.storage.restoredPoints += points.length;
+          }
         }
       }
     } catch (error) {
       console.warn("[monitor] could not load history:", error.message);
+    }
+  }
+
+  /**
+   * A Docker volume mounted on DATA_DIR lives on a different device than its
+   * parent folder. If both are the same device, the folder is part of the
+   * container filesystem and is wiped on every redeploy.
+   */
+  _checkMount() {
+    try {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+      this.storage.mounted =
+        fs.statSync(DATA_DIR).dev !== fs.statSync(path.dirname(DATA_DIR)).dev;
+    } catch {
+      this.storage.mounted = null;
     }
   }
 
@@ -488,7 +512,10 @@ class MonitorService {
       const tmp = `${HISTORY_FILE}.tmp`;
       await fs.promises.writeFile(tmp, JSON.stringify({ savedAt: Date.now(), tiers: out }));
       await fs.promises.rename(tmp, HISTORY_FILE);
+      this.storage.lastSavedAt = Date.now();
+      this.storage.error = null;
     } catch (error) {
+      this.storage.error = error.message;
       console.warn("[monitor] could not persist history:", error.message);
     }
   }
@@ -670,42 +697,51 @@ class MonitorService {
 
   /* ------------------------------- queries ------------------------------ */
 
-  _downsample(samples, maxPoints, keys) {
+  /** Averages samples into at most `maxPoints` equal time buckets of the range. */
+  _downsample(samples, maxPoints, keys, range) {
     if (samples.length <= maxPoints) return samples;
-    const size = Math.ceil(samples.length / maxPoints);
-    const out = [];
-    for (let i = 0; i < samples.length; i += size) {
-      const bucket = samples.slice(i, i + size);
-      const avg = { t: bucket[bucket.length - 1].t };
-      for (const k of keys) {
-        avg[k] = Math.round((bucket.reduce((a, s) => a + (s[k] || 0), 0) / bucket.length) * 10) / 10;
-      }
-      out.push(avg);
+    const width = Math.max(1, (range.to - range.from) / maxPoints);
+    const buckets = new Map();
+    for (const s of samples) {
+      const i = Math.floor((s.t - range.from) / width);
+      if (!buckets.has(i)) buckets.set(i, []);
+      buckets.get(i).push(s);
     }
-    return out;
+    return [...buckets.entries()]
+      .sort((a, b) => a[0] - b[0])
+      .map(([, bucket]) => {
+        const avg = { t: Math.round(bucket.reduce((a, s) => a + s.t, 0) / bucket.length) };
+        for (const k of keys) {
+          avg[k] =
+            Math.round((bucket.reduce((a, s) => a + (s[k] || 0), 0) / bucket.length) * 10) / 10;
+        }
+        return avg;
+      });
   }
 
   /**
-   * Samples of `key` inside [from, to], from the finest tier that reaches
-   * back to `from` (raw 10 s, then 1 min, then 15 min). If none does, the
-   * tier with the longest history is used.
+   * Samples of `key` inside [from, to]. The newest part comes from the
+   * finest data (raw 10 s), and each coarser tier (1 min, then 15 min) only
+   * fills the time before the finer one starts. This way a short or freshly
+   * restarted series still shows everything that is available, and older
+   * history is used where the fine data does not reach.
    */
   _series(kind, key, range) {
-    const raw = (kind === "host" ? this.hostHistory : this.history.get(key)) || [];
-    const candidates = [
-      { points: raw, ms: 10000 },
-      ...TIERS.map((t) => ({ points: this.tiers[t.name].get(key) || [], ms: t.ms })),
-    ].filter((c) => c.points.length);
+    const layers = [
+      kind === "host" ? this.hostHistory : this.history.get(key),
+      ...TIERS.map((t) => this.tiers[t.name].get(key)),
+    ];
 
-    const covering = candidates.find((c) => c.points[0].t <= range.from + c.ms);
-    const best =
-      covering ||
-      candidates.reduce(
-        (a, c) => (!a || c.points[0].t < a.points[0].t ? c : a),
-        null
-      );
-    if (!best) return [];
-    return best.points.filter((p) => p.t >= range.from && p.t <= range.to);
+    let out = [];
+    let upTo = range.to + 1; // exclusive: everything >= upTo is already covered
+    for (const points of layers) {
+      if (!points || !points.length) continue;
+      const part = points.filter((p) => p.t >= range.from && p.t < upTo);
+      out = part.concat(out);
+      upTo = Math.min(upTo, points[0].t);
+      if (upTo <= range.from) break;
+    }
+    return out;
   }
 
   _normalizeRange(range) {
@@ -741,7 +777,12 @@ class MonitorService {
 
     return {
       range: r,
-      history: this._downsample(samples, 120, ["cpu", "mem", "memPct", "rx", "tx", "br", "bw"]),
+      history: this._downsample(
+        samples,
+        120,
+        ["cpu", "mem", "memPct", "rx", "tx", "br", "bw"],
+        r
+      ),
       container: this.containers.get(uuid) || null,
       health: h
         ? {
@@ -762,11 +803,12 @@ class MonitorService {
     return {
       current: this.host,
       range: r,
-      history: this._downsample(this._series("host", HOST_KEY, r), 120, [
-        "cpu",
-        "mem",
-        "disk",
-      ]),
+      history: this._downsample(
+        this._series("host", HOST_KEY, r),
+        120,
+        ["cpu", "mem", "disk"],
+        r
+      ),
     };
   }
 
@@ -790,7 +832,7 @@ class MonitorService {
         memPct: latest.memPct,
         peakCpu: samples.reduce((m, p) => Math.max(m, p.cpu), 0),
         peakMemPct: samples.reduce((m, p) => Math.max(m, p.memPct), 0),
-        series: this._downsample(samples, 40, ["cpu", "memPct"]).map((p) => ({
+        series: this._downsample(samples, 40, ["cpu", "memPct"], r).map((p) => ({
           t: p.t,
           cpu: p.cpu,
           memPct: p.memPct,
@@ -800,8 +842,10 @@ class MonitorService {
     return out;
   }
 
-  getEvents(limit = 100) {
-    return this.events.slice(0, limit);
+  getEvents({ limit = 100, from, to } = {}) {
+    return this.events
+      .filter((e) => (from == null || e.ts >= from) && (to == null || e.ts <= to))
+      .slice(0, limit);
   }
 
   getActiveIncidents() {
@@ -939,6 +983,7 @@ class MonitorService {
       resourcesLoaded: this.resourcesLoaded,
       running: this.running,
       retentionDays: RETENTION_DAYS,
+      storage: this.storage,
     };
   }
 }
